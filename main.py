@@ -24,24 +24,24 @@ def current(state):
 
 def swapr(ar, r, c):
     x = list(ar[r])
-    x[c-1], x[c] = x[c], x[c-1]
-    x = ''.join(x)
-    ar[r] = ''.join(x)
+    x[c - 1], x[c] = x[c], x[c - 1]
+    x = "".join(x)
+    ar[r] = "".join(x)
     return ar
 
 
 def swapl(ar, r, c):
     x = list(ar[r])
-    x[c], x[c+1] = x[c+1], x[c]
-    ar[r] = ''.join(x)
+    x[c], x[c + 1] = x[c + 1], x[c]
+    ar[r] = "".join(x)
     return ar
 
 
 def swapup(ar, r, c):
     x = list(ar[r])
-    y = list(ar[r+1])
+    y = list(ar[r + 1])
     y[c], x[c] = x[c], y[c]
-    ar[r], ar[r+1] = ''.join(x), ''.join(y)
+    ar[r], ar[r + 1] = "".join(x), "".join(y)
     return ar
 
 
@@ -49,7 +49,7 @@ def swapdw(ar, r, c):
     x = list(ar[r])
     y = list(ar[r - 1])
     y[c], x[c] = x[c], y[c]
-    ar[r], ar[r - 1] = ''.join(x), ''.join(y)
+    ar[r], ar[r - 1] = "".join(x), "".join(y)
     return ar
 
 
@@ -80,7 +80,7 @@ def distance(state):
             x, y = 0, 0
             if not col == " ":
                 x = abs(int((int(col) - 1) / 3) - i)  # for rows
-                y = abs(((int(col)-1) % 3) - j)  # for columns
+                y = abs(((int(col) - 1) % 3) - j)  # for columns
             result += x + y
     return result
 
@@ -126,20 +126,22 @@ while True:
 
     # checking for the goal(will terminate if it's the goal)
     if is_goal(node.state):
-        print(f'taken time: {round(time.time() - start,5)} seconds')
-        print(f'# of explored nodes: {explored_nodes}')
+        print(f"taken time: {round(time.time() - start,5)} seconds")
+        print(f"# of explored nodes: {explored_nodes}")
         while node.parent is not None:
             solution.append(node.action)
             node = node.parent
         solution.reverse()
-        print(f'Frontier length = {frontier.__len__()}')
-        print(f'# of solution steps = {len(solution)}')
-        print(f'solution: {solution}')
+        print(f"Frontier length = {frontier.__len__()}")
+        print(f"# of solution steps = {len(solution)}")
+        print(f"solution: {solution}")
         break
 
     # expanding the node
     for trans in children(node.state):
         test = move(trans, node.state)
         if not frontier.contains_state(test) and test not in explored:
-            child = Node(state=test, parent=node, action=trans[0], heuristic=distance(test))
+            child = Node(
+                state=test, parent=node, action=trans[0], heuristic=distance(test)
+            )
             frontier.add(child)

@@ -1,5 +1,4 @@
 class Node:
-
     def __init__(self, state, parent=None, action=None, heuristic=0, cost=0):
         self.state = state
         self.parent = parent
@@ -10,7 +9,6 @@ class Node:
 
 # for the DFS
 class StackFrontier:
-
     def __init__(self):
         self.ft = []
 
@@ -35,7 +33,6 @@ class StackFrontier:
 
 # for the BFS or dijkstra
 class QueueFrontier(StackFrontier):
-
     def remove(self):
         if not self.is_empty():
             t = self.ft[0]
@@ -49,7 +46,6 @@ def get_heuristic(n):
 
 # for the GBFS or A*
 class GBFSFrontier(StackFrontier):
-
     def remove(self):
         self.ft.sort(key=get_heuristic)
         if not self.is_empty():

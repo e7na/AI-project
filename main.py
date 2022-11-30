@@ -21,7 +21,7 @@ def find_slot(state):
             return [row_number, col_number]
 
 
-def swapr(ar, r, c):
+def swapr(ar, c, r):
     x = list(ar[r])
     x[c - 1], x[c] = x[c], x[c - 1]
     x = "".join(x)
@@ -29,14 +29,14 @@ def swapr(ar, r, c):
     return ar
 
 
-def swapl(ar, r, c):
+def swapl(ar, c, r):
     x = list(ar[r])
     x[c], x[c + 1] = x[c + 1], x[c]
     ar[r] = "".join(x)
     return ar
 
 
-def swapup(ar, r, c):
+def swapup(ar, c, r):
     x = list(ar[r])
     y = list(ar[r + 1])
     y[c], x[c] = x[c], y[c]
@@ -44,7 +44,7 @@ def swapup(ar, r, c):
     return ar
 
 
-def swapdw(ar, r, c):
+def swapdw(ar, c, r):
     x = list(ar[r])
     y = list(ar[r - 1])
     y[c], x[c] = x[c], y[c]
@@ -52,23 +52,25 @@ def swapdw(ar, r, c):
     return ar
 
 
-def move(possible_move, state):
-    f = 0
-    b = []
-    for row in state:
-        b.append(row)
-        f += 1
-    action = possible_move[0]
-    r, c = possible_move[1][0], possible_move[1][1]
+def apply_move(move, state):
+    initial_state = state.copy()  # create new object instead of referencing the original
+    """
+    the move data structure is as follows
+    [   action : str ,
+        [ slot_y : int, slot_x : int ]
+    ]
+    """
+    action = move[0]
+    slot_x, slot_y  = move[1][1], move[1][0]
     if action == "up":
-        b = swapup(b, r, c)
+        new_state = swapup(initial_state, slot_x, slot_y)
     elif action == "dw":
-        b = swapdw(b, r, c)
+        new_state = swapdw(initial_state, slot_x, slot_y)
     elif action == "r":
-        b = swapr(b, r, c)
+        new_state = swapr(initial_state, slot_x, slot_y)
     elif action == "l":
-        b = swapl(b, r, c)
-    return b
+        new_state = swapl(initial_state, slot_x, slot_y)
+    return new_state
 
 
 def distance(state):
@@ -87,7 +89,7 @@ def distance(state):
     where value = (block number) - 1 and x,y index at 0
     """
     result = 0
-    # for each block on each row in the current state
+    # for each block on each row in the given state
     for current_y, row in enumerate(state):
         for current_x, block in enumerate(row):
             if not block == " ":
@@ -164,7 +166,7 @@ while not frontier.is_empty() and iteration_count <= iteration_limit:
     ## expanding the node
     # for each possible move from the current state
     for possible_move in children(current.state):
-        new_guess = move(possible_move, current.state)
+        new_guess = apply_move(possible_move, current.state)
         # if the state resulting from this move is neither explored nor in the frontier
         if not frontier.contains_state(new_guess) and new_guess not in explored:
             # then put it in a new node and add it to the frontier

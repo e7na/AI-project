@@ -52,14 +52,14 @@ def swapdw(ar, r, c):
     return ar
 
 
-def move(possible_moves, state):
+def move(possible_move, state):
     f = 0
     b = []
     for row in state:
         b.append(row)
         f += 1
-    action = possible_moves[0]
-    r, c = possible_moves[1][0], possible_moves[1][1]
+    action = possible_move[0]
+    r, c = possible_move[1][0], possible_move[1][1]
     if action == "up":
         b = swapup(b, r, c)
     elif action == "dw":
@@ -71,22 +71,42 @@ def move(possible_moves, state):
     return b
 
 
-# the calculation for the heuristic function
 def distance(state):
+    """
+    the heuristic function is the sum of distances of each block from
+    its goal position, the more shuffled the board is, the higher the
+    heuristic.
+    |1|2|3| to determine the goal position of a block, we first divide
+    |4|5|6| its value by the board's width to determine how many rows
+    |7|8| | percede the block, this is the block's vertical position.
+    The remainder of the division represents how many steps off the new
+    row the block is. so to determine the 6 block's goal position,
+    we do:
+        goal_x = value % width  = 5 % 3  = 2   # 3rd element
+        goal_y = value // width = 5 // 3 = 1   # on 2nd row
+    where value = (block number) - 1 and x,y index at 0
+    """
     result = 0
-    for row_number, row in enumerate(state):
-        for col_number, block in enumerate(row):
+    # for each block on each row in the current state
+    for current_y, row in enumerate(state):
+        for current_x, block in enumerate(row):
             if not block == " ":
-                # each block's value is its number-1
-                # because rows and cols index at 0
                 value = int(block) - 1
-                ## horizontal distance
-                x = abs((value % width) - col_number)
-                ## vertical distance
-                # // is integer division
-                # it floors the result
-                y = abs((value // width) - row_number)
-                result += x + y
+                goal_x = value % width
+                goal_y = value // width
+
+                x_distance = abs(
+                    goal_x - current_x
+                )  # horizontal distance is the difference between the
+                # block's current x position and its goal x position
+
+                y_distance = abs(
+                    goal_y - current_y
+                )  # vertical distance is the difference between the
+                # block's current y position and its goal y position
+
+                ## the heuristic is the sum of all distances for all blocks
+                result += x_distance + y_distance
     return result
 
 
@@ -110,51 +130,61 @@ def children(state):
     return possible_moves
 
 
-# now this is the process beginning
-node = Node(state=puzzle, parent=None, action=None)
+"""Initialise search parameters"""
+root = Node(state=puzzle, parent=None, action=None)
 # frontier = StackFrontier()
 # frontier = QueueFrontier()
 frontier = GBFSFrontier()
-frontier.add(node)
+frontier.add(root)
 explored = []
 solution = []
-explored_nodes = 0
 start = time.time()
-iterations_limit = 500
-iteration = 0
+iteration_limit = 500
+iteration_count = 0
 
-while True:
-    iteration += 1
-    # check if the frontier isn't empty
-    if frontier.is_empty() or iteration >= iterations_limit:
-        print("NO SOLUTION")
-        break
-    # remove from the frontier
-    node = frontier.remove()
+"""main search loop"""
+while not frontier.is_empty() and iteration_count <= iteration_limit:
+    iteration_count += 1
 
-    # add to the explored
-    explored.append(node.state)
-    explored_nodes += 1
+    # remove a node from the frontier
+    current = frontier.remove()
+    # add its state to the explored
+    explored.append(current.state)
 
-    # checking for the goal(will terminate if it's the goal)
-    if is_goal(node.state):
-        print(f"taken time: {round(time.time() - start,5)} seconds")
-        print(f"# of explored nodes: {explored_nodes}")
-        while node.parent is not None:
-            solution.append(node.action)
-            node = node.parent
-        solution.reverse()
-        print(f"Frontier length = {frontier.__len__()}")
-        print(f"# of solution steps = {len(solution)}")
-        print(f"solution: {solution}")
-        print(f"iterations: {iteration}")
+    # if the current state is the goal, then generate
+    # the solution steps list and exit out to print it
+    if is_goal(current.state):
+        while current.parent is not None:
+            # prepend current.action to the solution list
+            solution = [current.action, *solution]
+            # then move up the path one step
+            current = current.parent
         break
 
-    # expanding the node
-    for trans in children(node.state):
-        test = move(trans, node.state)
-        if not frontier.contains_state(test) and test not in explored:
+    ## expanding the node
+    # for each possible move from the current state
+    for possible_move in children(current.state):
+        new_guess = move(possible_move, current.state)
+        # if the state resulting from this move is neither explored nor in the frontier
+        if not frontier.contains_state(new_guess) and new_guess not in explored:
+            # then put it in a new node and add it to the frontier
             child = Node(
-                state=test, parent=node, action=trans[0], heuristic=distance(test)
+                state=new_guess,
+                parent=current,
+                action=possible_move[0],
+                heuristic=distance(new_guess),
             )
             frontier.add(child)
+
+
+if iteration_count >= iteration_limit:
+    print("attempt timed out")
+elif not solution:
+    print("no solution")
+else:
+    print(f"taken time: {round(time.time() - start,5)} seconds")
+    print(f"# of explored nodes: {len(explored)}")
+    print(f"Frontier length = {len(frontier)}")
+    print(f"# of solution steps = {len(solution)}")
+    print(f"solution: {solution}")
+    print(f"iterations: {iteration_count}")

@@ -148,7 +148,7 @@ iteration_count = 0
 
 
 """main search loop"""
-while not frontier.is_empty() and iteration_count <= iteration_limit:
+while not frontier.is_empty() and iteration_count < iteration_limit:
     iteration_count += 1
 
     # remove a node from the frontier

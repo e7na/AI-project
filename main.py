@@ -75,13 +75,19 @@ def move(possible_moves, state):
 # the calculation for the heuristic function
 def distance(state):
     result = 0
-    for i, row in enumerate(state):
-        for j, col in enumerate(row):
-            x, y = 0, 0
-            if not col == " ":
-                x = abs(int((int(col) - 1) / 3) - i)  # for rows
-                y = abs(((int(col) - 1) % 3) - j)  # for columns
-            result += x + y
+    for row_number, row in enumerate(state):
+        for col_number, block in enumerate(row):
+            if not block == " ":
+                # each block's value is its number-1
+                # because rows and cols index at 0
+                value = int(block) - 1
+                ## horizontal distance
+                x = abs((value % width) - col_number)
+                ## vertical distance
+                # // is integer division
+                # it floors the result
+                y = abs((value // width) - row_number)
+                result += (x + y)
     return result
 
 

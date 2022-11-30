@@ -3,23 +3,22 @@ from data_structure import *
 
 # initializing the puzzle properties
 width, height = 3, 3
-filename = "puzzle.txt"
-with open(filename) as p:
-    example = p.read()
-example = example.splitlines()
-
+input = "puzzle.txt"
+with open(input) as p:
+    puzzle = p.read().splitlines()
 
 # for the goal check
 def is_goal(state):
     return state == ["123", "456", "78 "]
 
 
-# allocating the empty block
-def current(state):
-    for row, st in enumerate(state):
-        col = st.find(" ")
-        if col > -1:
-            return [row, col]
+# locating the empty slot
+def find_slot(state):
+    for row_number, row in enumerate(state):
+        col_number = row.find(" ")  # col_number = -1 if " " not found
+        if col_number >= 0:  # if " " exists on the current row
+            # return its coordinates
+            return [row_number, col_number]
 
 
 def swapr(ar, r, c):
@@ -87,28 +86,32 @@ def distance(state):
                 # // is integer division
                 # it floors the result
                 y = abs((value // width) - row_number)
-                result += (x + y)
+                result += x + y
     return result
 
 
 # returning a list with possible neighbours
 def children(state):
-    pos = current(state)
-    r, c = pos[0], pos[1]
+    slot_coords = find_slot(state)  # slot = empty block
+    x, y = slot_coords[1], slot_coords[0]
     possible_moves = []
-    if c > 0:
-        possible_moves.append(["r", pos])
-    if c < 2:
-        possible_moves.append(["l", pos])
-    if r > 0:
-        possible_moves.append(["dw", pos])
-    if r < 2:
-        possible_moves.append(["up", pos])
+    if x > 0:  # if the slot is on the 2nd or 3rd column
+        # this means that a block can be moved to the right
+        possible_moves.append(["r", slot_coords])
+    if x < 2:  # if the slot is on the 1st or 2nd column
+        # this means that a block can be moved to the left
+        possible_moves.append(["l", slot_coords])
+    if y > 0:  # if the slot is on the 2nd or 3rd row
+        # this means that a block can be moved down
+        possible_moves.append(["dw", slot_coords])
+    if y < 2:  # if the slot is on the 1st or 2nd row
+        # this means that a block can be moved up
+        possible_moves.append(["up", slot_coords])
     return possible_moves
 
 
 # now this is the process beginning
-node = Node(state=example, parent=None, action=None)
+node = Node(state=puzzle, parent=None, action=None)
 # frontier = StackFrontier()
 # frontier = QueueFrontier()
 frontier = GBFSFrontier()

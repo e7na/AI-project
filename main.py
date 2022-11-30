@@ -111,10 +111,13 @@ explored = []
 solution = []
 explored_nodes = 0
 start = time.time()
+iterations_limit = 500
+iteration = 0
 
 while True:
+    iteration += 1
     # check if the frontier isn't empty
-    if frontier.is_empty():
+    if frontier.is_empty() or iteration >= iterations_limit:
         print("NO SOLUTION")
         break
     # remove from the frontier
@@ -135,6 +138,7 @@ while True:
         print(f"Frontier length = {frontier.__len__()}")
         print(f"# of solution steps = {len(solution)}")
         print(f"solution: {solution}")
+        print(f"iterations: {iteration}")
         break
 
     # expanding the node

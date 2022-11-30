@@ -53,7 +53,9 @@ def swapdw(ar, c, r):
 
 
 def apply_move(move, state):
-    initial_state = state.copy()  # create new object instead of referencing the original
+    initial_state = (
+        state.copy()
+    )  # create new object instead of referencing the original
     """
     the move data structure is as follows
     [   action : str ,
@@ -61,7 +63,7 @@ def apply_move(move, state):
     ]
     """
     action = move[0]
-    slot_x, slot_y  = move[1][1], move[1][0]
+    slot_x, slot_y = move[1][1], move[1][0]
     if action == "up":
         new_state = swapup(initial_state, slot_x, slot_y)
     elif action == "dw":
@@ -144,6 +146,7 @@ start = time.time()
 iteration_limit = 500
 iteration_count = 0
 
+
 """main search loop"""
 while not frontier.is_empty() and iteration_count <= iteration_limit:
     iteration_count += 1
@@ -184,9 +187,11 @@ if iteration_count >= iteration_limit:
 elif not solution:
     print("no solution")
 else:
-    print(f"taken time: {round(time.time() - start,5)} seconds")
-    print(f"# of explored nodes: {len(explored)}")
-    print(f"Frontier length = {len(frontier)}")
-    print(f"# of solution steps = {len(solution)}")
-    print(f"solution: {solution}")
-    print(f"iterations: {iteration_count}")
+    print(
+        f"taken time: {round(time.time() - start,5)} seconds"
+        f"\n# of explored nodes: {len(explored)}"
+        f"\nFrontier length = {len(frontier)}"
+        f"\n# of solution steps = {len(solution)}"
+        f"\nsolution: {solution}"
+        f"\niterations: {iteration_count}"
+    )

@@ -40,15 +40,9 @@ class QueueFrontier(StackFrontier):
             return t
 
 
-def get_heuristic(n):
-    return n.heuristic
-
-
 # for the GBFS or A*
-class GBFSFrontier(StackFrontier):
+class GBFSFrontier(QueueFrontier):
     def remove(self):
-        self.ft.sort(key=get_heuristic)
-        if not self.is_empty():
-            t = self.ft[0]
-            self.ft = self.ft[1:]
-            return t
+        # sort the frontier ascendingly by path cost
+        self.ft.sort(key=lambda node: node.heuristic)
+        return super().remove()

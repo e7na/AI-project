@@ -53,31 +53,31 @@ def distance(state):
     return result
 
 
-# locate the empty slot
+# locate the empty slot, and return its coordinates
 def find_slot(state):
     for row_number, row in enumerate(state):
         col_number = row.find(" ")  # col_number = -1 if " " not found
         if col_number >= 0:  # if " " exists on the current row
             # return its coordinates
             slot_x, slot_y = col_number, row_number
-            return [slot_x, slot_y]
+            return slot_x, slot_y
 
 
 # return a list of all possible neighbour nodes
 def children(state):
-    slot_coords = find_slot(state)  # slot = empty block
-    x, y = slot_coords
+    slot_coords = find_slot(state)  # the slot is the empty block
+    slot_x, slot_y = slot_coords
     possible_moves = []
-    if x > 0:  # if the slot is on the 2nd or 3rd column
+    if slot_x > 0:  # if the slot is on the 2nd or 3rd column
         # this means that a block can be moved to the right
         possible_moves.append(["r", slot_coords])
-    if x < 2:  # if the slot is on the 1st or 2nd column
+    if slot_x < 2:  # if the slot is on the 1st or 2nd column
         # this means that a block can be moved to the left
         possible_moves.append(["l", slot_coords])
-    if y > 0:  # if the slot is on the 2nd or 3rd row
+    if slot_y > 0:  # if the slot is on the 2nd or 3rd row
         # this means that a block can be moved down
         possible_moves.append(["dw", slot_coords])
-    if y < 2:  # if the slot is on the 1st or 2nd row
+    if slot_y < 2:  # if the slot is on the 1st or 2nd row
         # this means that a block can be moved up
         possible_moves.append(["up", slot_coords])
     return possible_moves

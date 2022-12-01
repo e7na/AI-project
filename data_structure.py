@@ -12,11 +12,11 @@ class QueueFrontier:
     def __init__(self):
         self.frontier = []
 
-    def is_empty(self):
-        return len(self.frontier) == 0
-
     def __len__(self):
         return len(self.frontier)
+
+    def is_empty(self):
+        return self.__len__() == 0
 
     def contains_state(self, state):
         return any(n.state == state for n in self.frontier)

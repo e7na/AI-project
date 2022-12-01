@@ -154,9 +154,9 @@ def swap_down(state, slot_coords):
 
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None)
-# frontier = StackFrontier()
-# frontier = QueueFrontier()
-frontier = GBFSFrontier()
+# frontier = StackFrontier()  # BFS
+# frontier = QueueFrontier()  # DFS
+frontier = GBFSFrontier()  # GBFS
 frontier.add(root)
 explored = []
 solution = []

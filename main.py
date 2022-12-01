@@ -55,12 +55,14 @@ def distance(state):
 
 # locate the empty slot, and return its coordinates
 def find_slot(state):
+    slot_coords = []
     for row_number, row in enumerate(state):
         col_number = row.find(" ")  # col_number = -1 if " " not found
         if col_number >= 0:  # if " " exists on the current row
             # return its coordinates
-            slot_x, slot_y = col_number, row_number
-            return slot_x, slot_y
+            slot_coords = [ slot_x, slot_y ] = [ col_number, row_number ]
+            break
+    return slot_coords
 
 
 # return a list of all possible neighbour nodes
@@ -105,6 +107,8 @@ def apply_move(move, state):
         new_state = swap_right(initial_state, slot_coords)
     elif action == "l":
         new_state = swap_left(initial_state, slot_coords)
+    else:
+        new_state = initial_state
     return new_state
 
 

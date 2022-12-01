@@ -67,21 +67,21 @@ def find_slot(state):
 
 # return a list of all possible neighbour nodes
 def children(state):
-    slot_coords = find_slot(state)  # the slot is the empty block
-    slot_x, slot_y = slot_coords
     possible_moves = []
-    if slot_x > 0:  # if the slot is on the 2nd or 3rd column
-        # this means that a block can be moved to the right
-        possible_moves.append(["r", slot_coords])
-    if slot_x < 2:  # if the slot is on the 1st or 2nd column
-        # this means that a block can be moved to the left
-        possible_moves.append(["l", slot_coords])
-    if slot_y > 0:  # if the slot is on the 2nd or 3rd row
-        # this means that a block can be moved down
-        possible_moves.append(["dw", slot_coords])
-    if slot_y < 2:  # if the slot is on the 1st or 2nd row
-        # this means that a block can be moved up
-        possible_moves.append(["up", slot_coords])
+    if slot_coords := find_slot(state):  # the slot is the empty block
+        slot_x, slot_y = slot_coords
+        if slot_x > 0:  # if the slot is on the 2nd or 3rd column
+            # this means that a block can be moved to the right
+            possible_moves.append(["r", slot_coords])
+        if slot_x < 2:  # if the slot is on the 1st or 2nd column
+            # this means that a block can be moved to the left
+            possible_moves.append(["l", slot_coords])
+        if slot_y > 0:  # if the slot is on the 2nd or 3rd row
+            # this means that a block can be moved down
+            possible_moves.append(["dw", slot_coords])
+        if slot_y < 2:  # if the slot is on the 1st or 2nd row
+            # this means that a block can be moved up
+            possible_moves.append(["up", slot_coords])
     return possible_moves
 
 
@@ -98,17 +98,16 @@ def apply_move(move, state):
         [ slot_x : int, slot_y : int ]
     ]
     """
-    action, slot_coords = move
-    if action == "up":
-        new_state = swap_up(initial_state, slot_coords)
-    elif action == "dw":
-        new_state = swap_down(initial_state, slot_coords)
-    elif action == "r":
-        new_state = swap_right(initial_state, slot_coords)
-    elif action == "l":
-        new_state = swap_left(initial_state, slot_coords)
-    else:
-        new_state = initial_state
+    match move:
+        case ["up", slot_coords]:
+            new_state = swap_up(initial_state, slot_coords)
+        case ["dw", slot_coords]:
+            new_state = swap_down(initial_state, slot_coords)
+        case ["l", slot_coords]:
+            new_state = swap_left(initial_state, slot_coords)
+        case ["r", slot_coords]:
+            new_state = swap_right(initial_state, slot_coords)
+        case _: new_state = initial_state
     return new_state
 
 

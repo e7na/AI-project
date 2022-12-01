@@ -36,8 +36,8 @@ class QueueFrontier:
 
 
 # for the GBFS or A*
-class GBFSFrontier(QueueFrontier):  # greedy
-    def remove(self):
+class GBFSFrontier(QueueFrontier):
+    def remove(self):  # greedy
         # sort the frontier by path cost
         self.frontier.sort(key=lambda node: node.heuristic)
         # then take out the cheapest, first element and return it
@@ -45,8 +45,8 @@ class GBFSFrontier(QueueFrontier):  # greedy
 
 
 # for the BFS or dijkstra
-class StackFrontier(QueueFrontier):  # LIFO
-    def remove(self):
+class StackFrontier(QueueFrontier):
+    def remove(self):  # LIFO
         if not self.is_empty():
             # pop off the top of the stack; the array's last element
             top = self.frontier[-1]

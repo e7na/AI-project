@@ -7,74 +7,13 @@ input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
 
-# for the goal check
+
+# check if the current state is the goal state
 def is_goal(state):
     return state == ["123", "456", "78 "]
 
 
-# locating the empty slot
-def find_slot(state):
-    for row_number, row in enumerate(state):
-        col_number = row.find(" ")  # col_number = -1 if " " not found
-        if col_number >= 0:  # if " " exists on the current row
-            # return its coordinates
-            return [row_number, col_number]
-
-
-def swapr(ar, c, r):
-    x = list(ar[r])
-    x[c - 1], x[c] = x[c], x[c - 1]
-    x = "".join(x)
-    ar[r] = "".join(x)
-    return ar
-
-
-def swapl(ar, c, r):
-    x = list(ar[r])
-    x[c], x[c + 1] = x[c + 1], x[c]
-    ar[r] = "".join(x)
-    return ar
-
-
-def swapup(ar, c, r):
-    x = list(ar[r])
-    y = list(ar[r + 1])
-    y[c], x[c] = x[c], y[c]
-    ar[r], ar[r + 1] = "".join(x), "".join(y)
-    return ar
-
-
-def swapdw(ar, c, r):
-    x = list(ar[r])
-    y = list(ar[r - 1])
-    y[c], x[c] = x[c], y[c]
-    ar[r], ar[r - 1] = "".join(x), "".join(y)
-    return ar
-
-
-def apply_move(move, state):
-    initial_state = (
-        state.copy()
-    )  # create new object instead of referencing the original
-    """
-    the move data structure is as follows
-    [   action : str ,
-        [ slot_y : int, slot_x : int ]
-    ]
-    """
-    action = move[0]
-    slot_x, slot_y = move[1][1], move[1][0]
-    if action == "up":
-        new_state = swapup(initial_state, slot_x, slot_y)
-    elif action == "dw":
-        new_state = swapdw(initial_state, slot_x, slot_y)
-    elif action == "r":
-        new_state = swapr(initial_state, slot_x, slot_y)
-    elif action == "l":
-        new_state = swapl(initial_state, slot_x, slot_y)
-    return new_state
-
-
+# the search cost function
 def distance(state):
     """
     the heuristic function is the sum of distances of each block from
@@ -114,10 +53,20 @@ def distance(state):
     return result
 
 
-# returning a list with possible neighbours
+# locate the empty slot
+def find_slot(state):
+    for row_number, row in enumerate(state):
+        col_number = row.find(" ")  # col_number = -1 if " " not found
+        if col_number >= 0:  # if " " exists on the current row
+            # return its coordinates
+            slot_x, slot_y = col_number, row_number
+            return [slot_x, slot_y]
+
+
+# return a list of all possible neighbour nodes
 def children(state):
     slot_coords = find_slot(state)  # slot = empty block
-    x, y = slot_coords[1], slot_coords[0]
+    x, y = slot_coords
     possible_moves = []
     if x > 0:  # if the slot is on the 2nd or 3rd column
         # this means that a block can be moved to the right
@@ -132,6 +81,75 @@ def children(state):
         # this means that a block can be moved up
         possible_moves.append(["up", slot_coords])
     return possible_moves
+
+
+# apply a specific move to a board given its state,
+# and return the state resulting from this move
+def apply_move(move, state):
+    initial_state = (
+        state.copy()
+    )  # create new object instead of referencing the original
+    """
+    the move data structure is as follows
+    move : list = [
+        action : str,
+        [ slot_x : int, slot_y : int ]
+    ]
+    """
+    action, slot_coords = move
+    if action == "up":
+        new_state = swap_up(initial_state, slot_coords)
+    elif action == "dw":
+        new_state = swap_down(initial_state, slot_coords)
+    elif action == "r":
+        new_state = swap_right(initial_state, slot_coords)
+    elif action == "l":
+        new_state = swap_left(initial_state, slot_coords)
+    return new_state
+
+
+def swap_right(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # get the row on which the slot is
+    row = list(state[slot_y])
+    # swap the slot with the block on its left in the row
+    row[slot_x - 1], row[slot_x] = row[slot_x], row[slot_x - 1]
+    state[slot_y] = "".join(row)
+    return state
+
+
+def swap_left(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # get the row on which the slot is
+    row = list(state[slot_y])
+    # swap the slot with the block on its right in the row
+    row[slot_x], row[slot_x + 1] = row[slot_x + 1], row[slot_x]
+    state[slot_y] = "".join(row)
+    return state
+
+
+def swap_up(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # get the row on which the slot is
+    slot_row = list(state[slot_y])
+    # get the row below it, which has the block we wanna move
+    block_row = list(state[slot_y + 1])
+    # then swap the slot with the block below it in the same column
+    block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
+    state[slot_y], state[slot_y + 1] = "".join(slot_row), "".join(block_row)
+    return state
+
+
+def swap_down(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # get the row on which the slot is
+    slot_row = list(state[slot_y])
+    # get the row above it, which has the block we wanna move
+    block_row = list(state[slot_y - 1])
+    # then swap the slot with the block above it in the same column
+    block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
+    state[slot_y], state[slot_y - 1] = "".join(slot_row), "".join(block_row)
+    return state
 
 
 """Initialise search parameters"""

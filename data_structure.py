@@ -8,41 +8,49 @@ class Node:
 
 
 # for the DFS
-class StackFrontier:
+class QueueFrontier:
     def __init__(self):
-        self.ft = []
+        self.frontier = []
 
     def is_empty(self):
-        return len(self.ft) == 0
+        return len(self.frontier) == 0
 
     def __len__(self):
-        return len(self.ft)
+        return len(self.frontier)
 
     def contains_state(self, state):
-        return any(n.state == state for n in self.ft)
+        return any(n.state == state for n in self.frontier)
 
-    def add(self, s):
-        self.ft.append(s)
+    def add(self, state):
+        # add to the top of the stack, which is the end of the array
+        self.frontier.append(state)
 
-    def remove(self):
+    def remove(self):  # FIFO
         if not self.is_empty():
-            t = self.ft[-1]
-            self.ft = self.ft[:-1]
-            return t
-
-
-# for the BFS or dijkstra
-class QueueFrontier(StackFrontier):
-    def remove(self):
-        if not self.is_empty():
-            t = self.ft[0]
-            self.ft = self.ft[1:]
-            return t
+            # take out the queue's head; the array's first element
+            head = self.frontier[0]
+            # and slice it off the array
+            self.frontier = self.frontier[1:]
+            # then return it
+            return head
 
 
 # for the GBFS or A*
-class GBFSFrontier(QueueFrontier):
+class GBFSFrontier(QueueFrontier):  # greedy
     def remove(self):
-        # sort the frontier ascendingly by path cost
-        self.ft.sort(key=lambda node: node.heuristic)
+        # sort the frontier by path cost
+        self.frontier.sort(key=lambda node: node.heuristic)
+        # then take out the cheapest element and return it
         return super().remove()
+
+
+# for the BFS or dijkstra
+class StackFrontier(QueueFrontier):  # LIFO
+    def remove(self):
+        if not self.is_empty():
+            # pop off the top of the stack; the array's last element
+            top = self.frontier[-1]
+            # and slice it off the array
+            self.frontier = self.frontier[:-1]
+            # then return it
+            return top

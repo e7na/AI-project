@@ -40,7 +40,7 @@ class GBFSFrontier(QueueFrontier):  # greedy
     def remove(self):
         # sort the frontier by path cost
         self.frontier.sort(key=lambda node: node.heuristic)
-        # then take out the cheapest element and return it
+        # then take out the cheapest, first element and return it
         return super().remove()
 
 

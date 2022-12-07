@@ -1,5 +1,6 @@
 ## setup instructions
-1. Install [graphviz](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/7.0.4/windows_10_cmake_Release_graphviz-install-7.0.4-win64.exe) 
+1. Install [graphviz](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/7.0.4/windows_10_cmake_Release_graphviz-install-7.0.4-win64.exe), and add it to system PATH
+   ![add graphviz to windows PATH](README.d/graphviz-path.png)
 2. Install Pipenv, or conda/mamba etc.
     </br>```pip install pipenv```
 3. Install project environment & dependencies

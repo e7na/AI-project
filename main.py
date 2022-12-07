@@ -10,6 +10,7 @@ SLOT = -1
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
+    # convert the board to an integer matrix
     puzzle = np.array(
         [
             [int(element) if element != " " else SLOT for element in row]
@@ -41,8 +42,6 @@ def distance(state):
     """
     result = 0
     # for each block on each row in the given state
-    # for current_y, row in enumerate(state):
-    #     for current_x, block in enumerate(row):
     for (current_y, current_x), block in np.ndenumerate(state):
         if block != SLOT:
             value = int(block) - 1
@@ -143,7 +142,6 @@ while not frontier.is_empty() and len(explored) < iteration_limit:
     # if the current state is the goal, then generate
     # the solution steps list and exit out to print it
     if is_goal(current.state):
-        # solution = ["dummy"]
         while current.parent is not None:
             # prepend current.action to the solution list
             solution = [current.action, *solution]
@@ -156,7 +154,6 @@ while not frontier.is_empty() and len(explored) < iteration_limit:
     for possible_move in children(current.state):
         new_guess = apply_move(possible_move, current.state)
         # if the state resulting from this move is neither explored nor in the frontier
-        # check if new_guess is not in frontier
         in_explored = any((new_guess == state).all() for state in explored)
         if not frontier.contains_state(new_guess) and not in_explored:
             # then put it in a new node and add it to the frontier

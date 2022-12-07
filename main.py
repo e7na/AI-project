@@ -5,18 +5,21 @@ from lolviz import *
 
 # initializing the puzzle properties
 width, height = 3, 3
+SLOT = -1
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
     puzzle = np.array(
-        [[int(element) if element != " " else -1 for element in row] for row in puzzle],
+        [
+            [int(element) if element != " " else SLOT for element in row]
+            for row in puzzle
+        ],
         dtype=np.int8,
     )
 
 # check if the current state is the goal state
 def is_goal(state):
-    return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, -1]])).all()
-
+    return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
 
 
 # the search cost function
@@ -37,25 +40,26 @@ def distance(state):
     """
     result = 0
     # for each block on each row in the given state
-    for current_y, row in enumerate(state):
-        for current_x, block in enumerate(row):
-            if not block == -1:
-                value = int(block) - 1
-                goal_x = value % width
-                goal_y = value // width
+    # for current_y, row in enumerate(state):
+    #     for current_x, block in enumerate(row):
+    for (current_y, current_x), block in np.ndenumerate(state):
+        if block != SLOT:
+            value = int(block) - 1
+            goal_x = value % width
+            goal_y = value // width
 
-                x_distance = abs(
-                    goal_x - current_x
-                )  # horizontal distance is the difference between the
-                # block's current x position and its goal x position
+            x_distance = abs(
+                goal_x - current_x
+            )  # horizontal distance is the difference between the
+            # block's current x position and its goal x position
 
-                y_distance = abs(
-                    goal_y - current_y
-                )  # vertical distance is the difference between the
-                # block's current y position and its goal y position
+            y_distance = abs(
+                goal_y - current_y
+            )  # vertical distance is the difference between the
+            # block's current y position and its goal y position
 
-                ## the heuristic is the sum of all distances for all blocks
-                result += x_distance + y_distance
+            ## the heuristic is the sum of all distances for all blocks
+            result += x_distance + y_distance
     return result
 
 
@@ -63,9 +67,8 @@ def distance(state):
 def find_slot(state):
     slot_coords = [
         [col_number, row_number]
-        for row_number, row in enumerate(state)
-        for col_number, block in enumerate(row)
-        if block == -1
+        for (row_number, col_number), block in np.ndenumerate(state)
+        if block == SLOT
     ][0]
     return slot_coords
 
@@ -77,13 +80,13 @@ def children(state):
         slot_x, slot_y = slot_coords
         if slot_x > 0:  # if the slot is on the 2nd or 3rd column
             # this means that a block can be moved to the right
-            possible_moves.append(["r", slot_coords])
+            possible_moves.append(["right", slot_coords])
         if slot_x < 2:  # if the slot is on the 1st or 2nd column
             # this means that a block can be moved to the left
-            possible_moves.append(["l", slot_coords])
+            possible_moves.append(["left", slot_coords])
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
-            possible_moves.append(["dw", slot_coords])
+            possible_moves.append(["down", slot_coords])
         if slot_y < 2:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
@@ -106,57 +109,54 @@ def apply_move(move, state):
     match move:
         case ["up", slot_coords]:
             new_state = swap_up(initial_state, slot_coords)
-        case ["dw", slot_coords]:
+        case ["down", slot_coords]:
             new_state = swap_down(initial_state, slot_coords)
-        case ["l", slot_coords]:
+        case ["left", slot_coords]:
             new_state = swap_left(initial_state, slot_coords)
-        case ["r", slot_coords]:
+        case ["right", slot_coords]:
             new_state = swap_right(initial_state, slot_coords)
-        case _: new_state = initial_state
+        case _:
+            new_state = initial_state
     return new_state
 
 
 def swap_right(state, slot_coords):
     slot_x, slot_y = slot_coords
-    # get the row on which the slot is
-    row = state[slot_y].copy()
     # swap the slot with the block on its left in the row
-    row[slot_x - 1], row[slot_x] = row[slot_x], row[slot_x - 1]
-    state[slot_y] = row
+    state[slot_y, slot_x], state[slot_y, slot_x - 1] = (
+        state[slot_y, slot_x - 1],
+        state[slot_y, slot_x],
+    )
     return state
 
 
 def swap_left(state, slot_coords):
     slot_x, slot_y = slot_coords
-    # get the row on which the slot is
-    row = state[slot_y].copy()
     # swap the slot with the block on its right in the row
-    row[slot_x], row[slot_x + 1] = row[slot_x + 1], row[slot_x]
-    state[slot_y] = row
+    state[slot_y, slot_x], state[slot_y, slot_x + 1] = (
+        state[slot_y, slot_x + 1],
+        state[slot_y, slot_x],
+    )
     return state
 
 
 def swap_up(state, slot_coords):
     slot_x, slot_y = slot_coords
-    # get the row on which the slot is
-    slot_row = state[slot_y].copy()
-    # get the row below it, which has the block we wanna move
-    block_row = state[slot_y + 1].copy()
-    # then swap the slot with the block below it in the same column
-    block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
-    state[slot_y], state[slot_y + 1] = slot_row, block_row
+    # swap the slot with the block below it in the same column
+    state[slot_y, slot_x], state[slot_y + 1, slot_x] = (
+        state[slot_y + 1, slot_x],
+        state[slot_y, slot_x],
+    )
     return state
 
 
 def swap_down(state, slot_coords):
     slot_x, slot_y = slot_coords
-    # get the row on which the slot is
-    slot_row = state[slot_y].copy()
-    # get the row above it, which has the block we wanna move
-    block_row = state[slot_y - 1].copy()
-    # then swap the slot with the block above it in the same column
-    block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
-    state[slot_y], state[slot_y - 1] = slot_row, block_row
+    # swap the slot with the block above it in the same column
+    state[slot_y, slot_x], state[slot_y - 1, slot_x] = (
+        state[slot_y - 1, slot_x],
+        state[slot_y, slot_x],
+    )
     return state
 
 
@@ -185,12 +185,12 @@ while not frontier.is_empty() and iteration_count < iteration_limit:
     # if the current state is the goal, then generate
     # the solution steps list and exit out to print it
     if is_goal(current.state):
-        solution = ["dummy"]
-        # while current.parent is not None:
-        #     # prepend current.action to the solution list
-        #     solution = [current.action, *solution]
-        #     # then move up the path one step
-        #     current = current.parent
+        # solution = ["dummy"]
+        while current.parent is not None:
+            # prepend current.action to the solution list
+            solution = [current.action, *solution]
+            # then move up the path one step
+            current = current.parent
         break
 
     ## expanding the node
@@ -198,9 +198,9 @@ while not frontier.is_empty() and iteration_count < iteration_limit:
     for possible_move in children(current.state):
         new_guess = apply_move(possible_move, current.state)
         # if the state resulting from this move is neither explored nor in the frontier
-         # check if new_guess is not in frontier
-        in_check = any((new_guess == state).all() for state in explored)
-        if not frontier.contains_state(new_guess) and not in_check:
+        # check if new_guess is not in frontier
+        in_explored = any((new_guess == state).all() for state in explored)
+        if not frontier.contains_state(new_guess) and not in_explored:
             # then put it in a new node and add it to the frontier
             child = Node(
                 state=new_guess,
@@ -224,6 +224,6 @@ else:
         f"\nsolution: {solution}"
         f"\niterations: {iteration_count}"
     )
-    current.reverse()
+
     graph = treeviz(root)
     graph.view()

@@ -1,10 +1,12 @@
 class Node:
-    def __init__(self, state, parent=None, action=None, heuristic=0, cost=0):
+    def __init__(self, state, parent=None, children=None, action=None, heuristic=None):
         self.state = state
         self.parent = parent
         self.action = action
         self.heuristic = heuristic
-        self.cost = cost
+        self.children = children
+        if self.parent is not None:
+            self.parent.add_child(self)
         
     def reverse(self):
         # reverse linked list
@@ -14,7 +16,13 @@ class Node:
             _prev = current.parent
             current.parent = _next
             _next, current = current, _prev
-
+    
+    # create a function that adds a node to the children list
+    def add_child(self, child):
+        if self.children is None:
+            self.children = []
+        if child is not None:
+            self.children.append(child)
 
 # for the DFS
 class QueueFrontier:

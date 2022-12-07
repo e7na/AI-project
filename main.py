@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from data_structure import *
+from lolviz import *
 
 # initializing the puzzle properties
 width, height = 3, 3
@@ -14,7 +15,8 @@ with open(input) as p:
 
 # check if the current state is the goal state
 def is_goal(state):
-    return state == ["123", "456", "78 "]
+    return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, -1]])).all()
+
 
 
 # the search cost function
@@ -183,11 +185,12 @@ while not frontier.is_empty() and iteration_count < iteration_limit:
     # if the current state is the goal, then generate
     # the solution steps list and exit out to print it
     if is_goal(current.state):
-        while current.parent is not None:
-            # prepend current.action to the solution list
-            solution = [current.action, *solution]
-            # then move up the path one step
-            current = current.parent
+        solution = ["dummy"]
+        # while current.parent is not None:
+        #     # prepend current.action to the solution list
+        #     solution = [current.action, *solution]
+        #     # then move up the path one step
+        #     current = current.parent
         break
 
     ## expanding the node
@@ -221,3 +224,6 @@ else:
         f"\nsolution: {solution}"
         f"\niterations: {iteration_count}"
     )
+    current.reverse()
+    graph = treeviz(root)
+    graph.view()

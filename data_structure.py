@@ -5,6 +5,15 @@ class Node:
         self.action = action
         self.heuristic = heuristic
         self.cost = cost
+        
+    def reverse(self):
+        # reverse linked list
+        _next = None
+        current = self
+        while current is not None:
+            _prev = current.parent
+            current.parent = _next
+            _next, current = current, _prev
 
 
 # for the DFS
@@ -20,6 +29,7 @@ class QueueFrontier:
 
     def contains_state(self, state):
         return any((n.state == state).all() for n in self.frontier)
+    
     def add(self, state):
         # add to the top of the stack, which is the end of the array
         self.frontier.append(state)

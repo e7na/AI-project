@@ -169,13 +169,11 @@ frontier.add(root)
 explored = []
 solution = []
 start = time.time()
-iteration_limit = 500
-iteration_count = 0
+iteration_limit = 2000
 
 
 """main search loop"""
-while not frontier.is_empty() and iteration_count < iteration_limit:
-    iteration_count += 1
+while not frontier.is_empty() and len(explored) < iteration_limit:
 
     # remove a node from the frontier
     current = frontier.remove()
@@ -211,7 +209,7 @@ while not frontier.is_empty() and iteration_count < iteration_limit:
             frontier.add(child)
 
 
-if iteration_count >= iteration_limit:
+if len(explored) >= iteration_limit:
     print("attempt timed out")
 elif not solution:
     print("no solution")
@@ -222,7 +220,6 @@ else:
         f"\nFrontier length = {len(frontier)}"
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
-        f"\niterations: {iteration_count}"
     )
 
     graph = treeviz(root)

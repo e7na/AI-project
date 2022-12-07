@@ -19,8 +19,7 @@ class QueueFrontier:
         return self.__len__() == 0
 
     def contains_state(self, state):
-        return any(n.state == state for n in self.frontier)
-
+        return any((n.state == state).all() for n in self.frontier)
     def add(self, state):
         # add to the top of the stack, which is the end of the array
         self.frontier.append(state)

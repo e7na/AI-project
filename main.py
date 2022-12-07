@@ -1,4 +1,5 @@
 import time
+import numpy as np
 from data_structure import *
 
 # initializing the puzzle properties
@@ -6,7 +7,10 @@ width, height = 3, 3
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
-
+    puzzle = np.array(
+        [[int(element) if element != " " else -1 for element in row] for row in puzzle],
+        dtype=np.int8,
+    )
 
 # check if the current state is the goal state
 def is_goal(state):
@@ -33,7 +37,7 @@ def distance(state):
     # for each block on each row in the given state
     for current_y, row in enumerate(state):
         for current_x, block in enumerate(row):
-            if not block == " ":
+            if not block == -1:
                 value = int(block) - 1
                 goal_x = value % width
                 goal_y = value // width
@@ -55,13 +59,12 @@ def distance(state):
 
 # locate the empty slot, and return its coordinates
 def find_slot(state):
-    slot_coords = []
-    for row_number, row in enumerate(state):
-        col_number = row.find(" ")  # col_number = -1 if " " not found
-        if col_number >= 0:  # if " " exists on the current row
-            # return its coordinates
-            slot_coords = [ slot_x, slot_y ] = [ col_number, row_number ]
-            break
+    slot_coords = [
+        [col_number, row_number]
+        for row_number, row in enumerate(state)
+        for col_number, block in enumerate(row)
+        if block == -1
+    ][0]
     return slot_coords
 
 
@@ -114,44 +117,44 @@ def apply_move(move, state):
 def swap_right(state, slot_coords):
     slot_x, slot_y = slot_coords
     # get the row on which the slot is
-    row = list(state[slot_y])
+    row = state[slot_y].copy()
     # swap the slot with the block on its left in the row
     row[slot_x - 1], row[slot_x] = row[slot_x], row[slot_x - 1]
-    state[slot_y] = "".join(row)
+    state[slot_y] = row
     return state
 
 
 def swap_left(state, slot_coords):
     slot_x, slot_y = slot_coords
     # get the row on which the slot is
-    row = list(state[slot_y])
+    row = state[slot_y].copy()
     # swap the slot with the block on its right in the row
     row[slot_x], row[slot_x + 1] = row[slot_x + 1], row[slot_x]
-    state[slot_y] = "".join(row)
+    state[slot_y] = row
     return state
 
 
 def swap_up(state, slot_coords):
     slot_x, slot_y = slot_coords
     # get the row on which the slot is
-    slot_row = list(state[slot_y])
+    slot_row = state[slot_y].copy()
     # get the row below it, which has the block we wanna move
-    block_row = list(state[slot_y + 1])
+    block_row = state[slot_y + 1].copy()
     # then swap the slot with the block below it in the same column
     block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
-    state[slot_y], state[slot_y + 1] = "".join(slot_row), "".join(block_row)
+    state[slot_y], state[slot_y + 1] = slot_row, block_row
     return state
 
 
 def swap_down(state, slot_coords):
     slot_x, slot_y = slot_coords
     # get the row on which the slot is
-    slot_row = list(state[slot_y])
+    slot_row = state[slot_y].copy()
     # get the row above it, which has the block we wanna move
-    block_row = list(state[slot_y - 1])
+    block_row = state[slot_y - 1].copy()
     # then swap the slot with the block above it in the same column
     block_row[slot_x], slot_row[slot_x] = slot_row[slot_x], block_row[slot_x]
-    state[slot_y], state[slot_y - 1] = "".join(slot_row), "".join(block_row)
+    state[slot_y], state[slot_y - 1] = slot_row, block_row
     return state
 
 
@@ -192,7 +195,9 @@ while not frontier.is_empty() and iteration_count < iteration_limit:
     for possible_move in children(current.state):
         new_guess = apply_move(possible_move, current.state)
         # if the state resulting from this move is neither explored nor in the frontier
-        if not frontier.contains_state(new_guess) and new_guess not in explored:
+         # check if new_guess is not in frontier
+        in_check = any((new_guess == state).all() for state in explored)
+        if not frontier.contains_state(new_guess) and not in_check:
             # then put it in a new node and add it to the frontier
             child = Node(
                 state=new_guess,

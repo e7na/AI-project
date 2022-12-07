@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from data_structure import *
+from state_ops import *
 from lolviz import *
 
 # initializing the puzzle properties
@@ -120,46 +121,6 @@ def apply_move(move, state):
     return new_state
 
 
-def swap_right(state, slot_coords):
-    slot_x, slot_y = slot_coords
-    # swap the slot with the block on its left in the row
-    state[slot_y, slot_x], state[slot_y, slot_x - 1] = (
-        state[slot_y, slot_x - 1],
-        state[slot_y, slot_x],
-    )
-    return state
-
-
-def swap_left(state, slot_coords):
-    slot_x, slot_y = slot_coords
-    # swap the slot with the block on its right in the row
-    state[slot_y, slot_x], state[slot_y, slot_x + 1] = (
-        state[slot_y, slot_x + 1],
-        state[slot_y, slot_x],
-    )
-    return state
-
-
-def swap_up(state, slot_coords):
-    slot_x, slot_y = slot_coords
-    # swap the slot with the block below it in the same column
-    state[slot_y, slot_x], state[slot_y + 1, slot_x] = (
-        state[slot_y + 1, slot_x],
-        state[slot_y, slot_x],
-    )
-    return state
-
-
-def swap_down(state, slot_coords):
-    slot_x, slot_y = slot_coords
-    # swap the slot with the block above it in the same column
-    state[slot_y, slot_x], state[slot_y - 1, slot_x] = (
-        state[slot_y - 1, slot_x],
-        state[slot_y, slot_x],
-    )
-    return state
-
-
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None)
 # frontier = StackFrontier()  # BFS
@@ -174,7 +135,6 @@ iteration_limit = 2000
 
 """main search loop"""
 while not frontier.is_empty() and len(explored) < iteration_limit:
-
     # remove a node from the frontier
     current = frontier.remove()
     # add its state to the explored
@@ -221,6 +181,5 @@ else:
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )
-
     graph = treeviz(root)
     graph.view()

@@ -19,7 +19,7 @@ def gr_dict_html(title, items, highlight=None, bgcolor=lv.YELLOW, separator="&ra
         rows = []
     if len(items) > 0:
         for label, key, value in atoms + ptrs:  # do atoms first then ptrs
-            if label == 'is_sol':
+            if label == 'is_sol' or label == 'parent':
                 continue
             font = "Helvetica"
             if highlight is not None and key in highlight:

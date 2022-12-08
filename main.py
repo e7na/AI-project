@@ -2,7 +2,7 @@ import time
 import numpy as np
 from data_structure import *
 from state_ops import *
-from lolviz import *
+from yamete import *
 
 # initializing the puzzle properties
 width, height = 3, 3
@@ -17,6 +17,7 @@ with open(input) as p:
         ],
         dtype=np.int8,
     )
+
 
 # check if the current state is the goal state
 def is_goal(state):
@@ -122,7 +123,7 @@ def apply_move(move, state):
 
 
 """Initialise search parameters"""
-root = Node(state=puzzle, parent=None, action=None)
+root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 # frontier = StackFrontier()  # BFS
 # frontier = QueueFrontier()  # DFS
 frontier = GBFSFrontier()  # GBFS
@@ -145,6 +146,7 @@ while not frontier.is_empty() and len(explored) < iteration_limit:
     if is_goal(current.state):
         # solution = ["dummy"]
         while current.parent is not None:
+            current.is_sol = 1
             # prepend current.action to the solution list
             solution = [current.action, *solution]
             # then move up the path one step
@@ -181,5 +183,5 @@ else:
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )
-    graph = treeviz(root)
+    graph = lv.treeviz(root)
     graph.view()

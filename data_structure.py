@@ -1,10 +1,11 @@
 class Node:
-    def __init__(self, state, parent=None, children=None, action=None, heuristic=None):
+    def __init__(self, state, parent=None, children=None, action=None, heuristic=None, is_sol=None):
         self.state = state
         self.parent = parent
         self.action = action
         self.heuristic = heuristic
         self.children = children
+        self.is_sol = is_sol
         if self.parent is not None:
             self.parent.add_child(self)
         

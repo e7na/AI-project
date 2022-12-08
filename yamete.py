@@ -229,7 +229,8 @@ def node_edges(p, varnames=None):
     return edges
 
 
-# overriding the function inside the module
+# overriding the functions inside lolviz
 lv.gr_dict_html = gr_dict_html
+lv.obj_node = obj_node
 lv.node_edges = node_edges
 lv.closure_ = closure_

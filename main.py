@@ -11,7 +11,7 @@ from state_ops import *
 from yamete import *
 
 # initializing the puzzle properties
-width, height = 3, 3
+# width, height = 3, 3
 SLOT = -1
 input = "puzzle.txt"
 with open(input) as p:
@@ -19,15 +19,18 @@ with open(input) as p:
     # convert the board to an integer matrix
     puzzle = np.array(
         [
-            [int(element) if element != " " else SLOT for element in row]
+            [int(element) if element != " " else SLOT for element in row.split(",")]
             for row in puzzle
         ],
         dtype=np.int8,
     )
+    width, height = puzzle.shape
 
 
 # check if the current state is the goal state
 def is_goal(state):
+    # return (np.roll(np.sort(state.copy()), -1) == state).any()
+
     return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
 
 
@@ -161,6 +164,7 @@ def display_sol(frames, initial=0):
                 for block in row:
                     imgui.text(str(block) if block != SLOT else " ")
                     imgui.next_column()
+                imgui.separator()
             imgui.columns(1)
             imgui.spacing()
             match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
@@ -184,7 +188,7 @@ root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 frontier = GBFSFrontier()  # GBFS
 frontier.add(root)
 explored = []
-# solution = []
+solution = []
 path = []
 start = time.time()
 iteration_limit = 2000

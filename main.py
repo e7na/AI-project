@@ -91,13 +91,13 @@ def children(state):
         if slot_x > 0:  # if the slot is on the 2nd or 3rd column
             # this means that a block can be moved to the right
             possible_moves.append(["right", slot_coords])
-        if slot_x < 2:  # if the slot is on the 1st or 2nd column
+        if slot_x < width-1:  # if the slot is on the 1st or 2nd column
             # this means that a block can be moved to the left
             possible_moves.append(["left", slot_coords])
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
             possible_moves.append(["down", slot_coords])
-        if slot_y < 2:  # if the slot is on the 1st or 2nd row
+        if slot_y < width-1:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
     return possible_moves

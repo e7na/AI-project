@@ -159,7 +159,7 @@ def display_sol(frames, initial=0):
             | imgui.WINDOW_NO_MOVE
             | imgui.WINDOW_NO_TITLE_BAR,
         ):
-            imgui.columns(3)
+            imgui.columns(width)
             for row in frame:
                 for block in row:
                     imgui.text(str(block) if block != SLOT else " ")

@@ -13,13 +13,14 @@ from yamete import *
 # initializing the puzzle properties
 # width, height = 3, 3
 SLOT = -1
+SEP = "|"
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
     # convert the board to an integer matrix
     puzzle = np.array(
         [
-            [int(element) if element != " " else SLOT for element in row.split(",")]
+            [int(element) if element != " " else SLOT for element in row.split(SEP)]
             for row in puzzle
         ],
         dtype=np.int8,

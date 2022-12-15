@@ -10,15 +10,20 @@ class Node:
             self.parent.add_child(self)
         
         
-    # this function is unused in the code
-    def reverse(self):
-        # reverse linked list
+    def reverse(self, copy=False):
         _next = None
-        current = self
-        while current is not None:
-            _prev = current.parent
-            current.parent = _next
-            _next, current = current, _prev
+        if copy:
+            current = self.copy()
+            while current is not None:
+                _prev = current.parent.copy()
+                current.parent = _next
+                _next, current =  current, _prev
+        else:
+            current = self
+            while current is not None:
+                _prev = current.parent
+                current.parent = _next
+                _next, current = current, _prev
 
             
     def add_child(self, child):

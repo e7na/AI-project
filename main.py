@@ -1,5 +1,11 @@
+from __future__ import absolute_import
 import time
 import numpy as np
+import pygame
+import sys
+import OpenGL.GL as gl
+from imgui.integrations.pygame import PygameRenderer
+import imgui
 from data_structure import *
 from state_ops import *
 from yamete import *
@@ -121,6 +127,56 @@ def apply_move(move, state):
     return new_state
 
 
+def display_sol(frames, initial=0):
+    idx = initial
+    size = 500, 500
+
+    pygame.init()
+    pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
+
+    imgui.create_context()
+    impl = PygameRenderer()
+
+    io = imgui.get_io()
+    io.display_size = size
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            impl.process_event(event)
+        imgui.new_frame()
+
+        frame = frames[idx]
+
+        with imgui.begin(
+            "Board",
+            flags=imgui.WINDOW_NO_RESIZE
+            | imgui.WINDOW_NO_MOVE
+            | imgui.WINDOW_NO_TITLE_BAR,
+        ):
+            imgui.columns(3)
+            for row in frame:
+                for block in row:
+                    imgui.text(str(block) if block != SLOT else " ")
+                    imgui.next_column()
+            imgui.columns(1)
+            imgui.spacing()
+            match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
+                case [index, _, _, True] if index < len(frames) - 1:
+                    idx += 1
+                case [index, True, _, _] if index > 0:
+                    idx -= 1
+
+        gl.glClearColor(1, 1, 1, 1)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+        imgui.render()
+        impl.render(imgui.get_draw_data())
+
+        pygame.display.flip()
+
+
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 # frontier = StackFrontier()  # BFS
@@ -128,7 +184,8 @@ root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 frontier = GBFSFrontier()  # GBFS
 frontier.add(root)
 explored = []
-solution = []
+# solution = []
+path = []
 start = time.time()
 iteration_limit = 2000
 
@@ -143,10 +200,12 @@ while not frontier.is_empty() and len(explored) < iteration_limit:
     # if the current state is the goal, then generate
     # the solution steps list and exit out to print it
     if is_goal(current.state):
+        leaf = current  # parse the solution steps non destructively
         while current.parent is not None:
             current.is_sol = 1
             # prepend current.action to the solution list
-            solution = [current.action, *solution]
+            # solution = [current.action, *solution]
+            path = [current, *path]
             # then move up the path one step
             current = current.parent
         break
@@ -167,6 +226,9 @@ while not frontier.is_empty() and len(explored) < iteration_limit:
             )
             frontier.add(child)
 
+if path:
+    solution = [node.action for node in path]
+    frames = [node.state for node in path]
 
 if len(explored) >= iteration_limit:
     print("attempt timed out")
@@ -182,3 +244,4 @@ else:
     )
     graph = lv.treeviz(root)
     graph.view()
+    display_sol(frames)

@@ -30,8 +30,8 @@ with open(input) as p:
 # check if the current state is the goal state
 def is_goal(state):
     # return (np.roll(np.sort(state.copy()), -1) == state).any()
-
-    return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
+    return ([*range(len(state)-1), SLOT] == state).any()
+    # return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
 
 
 # the search cost function

@@ -11,9 +11,10 @@ from state_ops import *
 from yamete import *
 
 # initializing the puzzle properties
-SLOT = -1
+SLOT = "  "
 SEPARATOR = "|"
-PLACEHOLDER = "  "
+PLACEHOLDER = -1
+
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
@@ -21,7 +22,7 @@ with open(input) as p:
     puzzle = np.array(
         [
             [
-                int(element) if element != PLACEHOLDER else SLOT
+                int(element) if element != SLOT else PLACEHOLDER
                 for element in row.split(SEPARATOR)
             ]
             for row in puzzle
@@ -35,7 +36,7 @@ with open(input) as p:
 def is_goal(state):
     # return (np.roll(np.sort(state.copy()), -1) == state).any()
     flat = state.flatten()
-    goal = np.array([*range(1, len(flat)), SLOT])
+    goal = np.array([*range(1, len(flat)), PLACEHOLDER])
     return (flat == goal).all()
     # return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
 
@@ -59,7 +60,7 @@ def distance(state):
     result = 0
     # for each block on each row in the given state
     for (current_y, current_x), block in np.ndenumerate(state):
-        if block != SLOT:
+        if block != PLACEHOLDER:
             value = int(block) - 1
             goal_x = value % width
             goal_y = value // width
@@ -84,7 +85,7 @@ def find_slot(state):
     slot_coords = [
         [col_number, row_number]
         for (row_number, col_number), block in np.ndenumerate(state)
-        if block == SLOT
+        if block == PLACEHOLDER
     ][0]
     return slot_coords
 
@@ -204,8 +205,7 @@ print()
 while not frontier.is_empty() and len(explored) <= iteration_limit:
     # realtime feedback to determine whether it's hung up or not
     print(
-        f"\033[Ffrontier length: {len(frontier)}"
-        f"\nexplored length: {len(explored)}",
+        f"\033[Ffrontier length: {len(frontier)}" f"\nexplored length: {len(explored)}",
         end="",
     )
     # remove a node from the frontier

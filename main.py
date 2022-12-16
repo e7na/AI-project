@@ -152,31 +152,33 @@ def display_sol(frames, initial=0):
         glfw.poll_events()
         impl.process_inputs()
         # io = imgui.get_io()
-        imgui.new_frame()
-
         frame = frames[idx]
-
-        imgui.begin(
-            "Board"
+        imgui.new_frame()
+        _, keep_window_open = imgui.begin(
+            "Board",
+            closable=True,
         )
         imgui.columns(width)
         for row in frame:
+            imgui.separator()
             for block in row:
                 imgui.text(str(block) if block != PLACEHOLDER else SLOT)
                 imgui.next_column()
-            imgui.separator()
         imgui.columns(1)
-        imgui.spacing()
+        imgui.separator()
+
+        imgui.spacing() ; imgui.spacing()
         match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
             case [index, _, _, True] if index < len(frames) - 1:
                 idx += 1
             case [index, True, _, _] if index > 0:
                 idx -= 1
         imgui.end()
-
         imgui.render()
         impl.render(imgui.get_draw_data())
         glfw.swap_buffers(window)
+        if not keep_window_open:
+            glfw.set_window_should_close(window, True)
     impl.shutdown()
     glfw.terminate()
 

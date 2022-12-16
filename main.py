@@ -142,7 +142,7 @@ def display_sol(frames, initial=0):
     # pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
 
     imgui.create_context()
-    window = impl_glfw_init()
+    window = impl_glfw_init("Sliding puzzle", size)
     impl = GlfwRenderer(window)
 
     io = imgui.get_io()

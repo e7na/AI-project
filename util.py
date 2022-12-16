@@ -41,9 +41,9 @@ def swap_down(state, slot_coords):
     return state
 
 
-def impl_glfw_init(size):
-    width, height = 500, 500
-    window_name = "minimal ImGui/GLFW3 example"
+def impl_glfw_init(title, size):
+    width, height = size
+    # title = "minimal ImGui/GLFW3 example"
 
     if not glfw.init():
         print("Could not initialize OpenGL context")
@@ -58,7 +58,7 @@ def impl_glfw_init(size):
 
     # Create a windowed mode window and its OpenGL context
     window = glfw.create_window(
-        int(width), int(height), window_name, None, None
+        int(width), int(height), title, None, None
     )
     glfw.make_context_current(window)
 

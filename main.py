@@ -157,8 +157,7 @@ def display_sol(frames, initial=0):
         frame = frames[idx]
 
         imgui.begin(
-            "Board",
-            flags=imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR,
+            "Board"
         )
         imgui.columns(width)
         for row in frame:

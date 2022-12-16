@@ -54,7 +54,10 @@ def impl_glfw_init(title, size):
     glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
     glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_COMPAT_PROFILE)
-
+    # glfw.window_hint(glfw.RESIZABLE, 1)
+    glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, 1)
+    glfw.window_hint(glfw.DECORATED, 0)
+    # glfw.window_hint(glfw.VISIBLE, 0)
     # Create a windowed mode window and its OpenGL context
     window = glfw.create_window(int(width), int(height), title, None, None)
     glfw.make_context_current(window)

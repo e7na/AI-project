@@ -199,9 +199,15 @@ path = []
 start = time.time()
 iteration_limit = 2000
 
-
+print()
 """main search loop"""
-while not frontier.is_empty() and len(explored) < iteration_limit:
+while not frontier.is_empty() and len(explored) <= iteration_limit:
+    # realtime feedback to determine whether it's hung up or not
+    print(
+        f"\033[Ffrontier length: {len(frontier)}"
+        f"\nexplored length: {len(explored)}",
+        end="",
+    )
     # remove a node from the frontier
     current = frontier.remove()
     # add its state to the explored
@@ -240,15 +246,14 @@ if path:
     solution = [node.action for node in path]
     frames = [node.state for node in path]
 
+print("\n")
 if len(explored) >= iteration_limit:
     print("attempt timed out")
 elif not solution:
     print("no solution")
 else:
     print(
-        f"taken time: {round(time.time() - start,5)} seconds"
-        f"\n# of explored nodes: {len(explored)}"
-        f"\nFrontier length = {len(frontier)}"
+        f"search time: {round(time.time() - start,5)} seconds"
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )

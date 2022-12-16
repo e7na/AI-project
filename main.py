@@ -138,22 +138,18 @@ def display_sol(frames, initial=0):
     idx = initial
     size = 500, 500
 
-    # pygame.init()
-    # pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
-
+    gl.glClearColor(1, 1, 1, 1)
     imgui.create_context()
     window = impl_glfw_init("Sliding puzzle", size)
     impl = GlfwRenderer(window)
 
-    io = imgui.get_io()
     # io.display_size = size
 
     while not glfw.window_should_close(window):
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         sys.exit()
-
-        #     impl.process_event(event)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+        glfw.poll_events()
+        impl.process_inputs()
+        # io = imgui.get_io()
         imgui.new_frame()
 
         frame = frames[idx]
@@ -178,8 +174,6 @@ def display_sol(frames, initial=0):
                 idx -= 1
         imgui.end()
 
-        gl.glClearColor(1, 1, 1, 1)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
         imgui.render()        
         impl.render(imgui.get_draw_data())
         glfw.swap_buffers(window)

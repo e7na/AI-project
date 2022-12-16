@@ -150,7 +150,8 @@ print()
 while not frontier.is_empty() and len(explored) <= iteration_limit:
     # realtime feedback to determine whether it's hung up or not
     print(
-        f"\033[Ffrontier length: {len(frontier)}" f"\nexplored length: {len(explored)}",
+        f"\033[Ffrontier length: {len(frontier)}"
+        f"\nexplored length: {len(explored)}",
         end="",
     )
     # remove a node from the frontier

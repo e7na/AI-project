@@ -11,16 +11,19 @@ from state_ops import *
 from yamete import *
 
 # initializing the puzzle properties
-# width, height = 3, 3
 SLOT = -1
-SEP = "|"
+SEPARATOR = "|"
+PLACEHOLDER = "  "
 input = "puzzle.txt"
 with open(input) as p:
     puzzle = p.read().splitlines()
     # convert the board to an integer matrix
     puzzle = np.array(
         [
-            [int(element) if element != " " else SLOT for element in row.split(SEP)]
+            [
+                int(element) if element != PLACEHOLDER else SLOT
+                for element in row.split(SEPARATOR)
+            ]
             for row in puzzle
         ],
         dtype=np.int8,
@@ -31,7 +34,7 @@ with open(input) as p:
 # check if the current state is the goal state
 def is_goal(state):
     # return (np.roll(np.sort(state.copy()), -1) == state).any()
-    return ([*range(len(state)-1), SLOT] == state).any()
+    return ([*range(len(state) - 1), SLOT] == state).any()
     # return (state == np.array([[1, 2, 3], [4, 5, 6], [7, 8, SLOT]])).all()
 
 
@@ -92,13 +95,13 @@ def children(state):
         if slot_x > 0:  # if the slot is on the 2nd or 3rd column
             # this means that a block can be moved to the right
             possible_moves.append(["right", slot_coords])
-        if slot_x < width-1:  # if the slot is on the 1st or 2nd column
+        if slot_x < width - 1:  # if the slot is on the 1st or 2nd column
             # this means that a block can be moved to the left
             possible_moves.append(["left", slot_coords])
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
             possible_moves.append(["down", slot_coords])
-        if slot_y < width-1:  # if the slot is on the 1st or 2nd row
+        if slot_y < width - 1:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
     return possible_moves
@@ -163,7 +166,7 @@ def display_sol(frames, initial=0):
             imgui.columns(width)
             for row in frame:
                 for block in row:
-                    imgui.text(str(block) if block != SLOT else " ")
+                    imgui.text(str(block) if block != SLOT else PLACEHOLDER)
                     imgui.next_column()
                 imgui.separator()
             imgui.columns(1)

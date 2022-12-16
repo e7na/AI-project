@@ -184,8 +184,8 @@ def display_sol(frames, initial=0):
 
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-# frontier = StackFrontier()  # BFS
-# frontier = QueueFrontier()  # DFS
+# frontier = StackFrontier()  # DFS
+# frontier = QueueFrontier()  # BFS
 frontier = GBFSFrontier()  # GBFS
 frontier.add(root)
 explored = []

@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 import time
 import numpy as np
-import pygame
-import sys
+# import sys
+import glfw
 import OpenGL.GL as gl
-from imgui.integrations.pygame import PygameRenderer
+from imgui.integrations.glfw import GlfwRenderer
 import imgui
 from data_structure import *
-from state_ops import *
+from util import *
 from yamete import *
 
 # initializing the puzzle properties
@@ -138,51 +138,53 @@ def display_sol(frames, initial=0):
     idx = initial
     size = 500, 500
 
-    pygame.init()
-    pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
+    # pygame.init()
+    # pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
 
     imgui.create_context()
-    impl = PygameRenderer()
+    window = impl_glfw_init()
+    impl = GlfwRenderer(window)
 
     io = imgui.get_io()
-    io.display_size = size
+    # io.display_size = size
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
+    while not glfw.window_should_close(window):
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         sys.exit()
 
-            impl.process_event(event)
+        #     impl.process_event(event)
         imgui.new_frame()
 
         frame = frames[idx]
 
-        with imgui.begin(
+        imgui.begin(
             "Board",
-            flags=imgui.WINDOW_NO_RESIZE
-            | imgui.WINDOW_NO_MOVE
+            flags=imgui.WINDOW_NO_MOVE
             | imgui.WINDOW_NO_TITLE_BAR,
-        ):
-            imgui.columns(width)
-            for row in frame:
-                for block in row:
-                    imgui.text(str(block) if block != SLOT else PLACEHOLDER)
-                    imgui.next_column()
-                imgui.separator()
-            imgui.columns(1)
-            imgui.spacing()
-            match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
-                case [index, _, _, True] if index < len(frames) - 1:
-                    idx += 1
-                case [index, True, _, _] if index > 0:
-                    idx -= 1
+        )
+        imgui.columns(width)
+        for row in frame:
+            for block in row:
+                imgui.text(str(block) if block != SLOT else PLACEHOLDER)
+                imgui.next_column()
+            imgui.separator()
+        imgui.columns(1)
+        imgui.spacing()
+        match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
+            case [index, _, _, True] if index < len(frames) - 1:
+                idx += 1
+            case [index, True, _, _] if index > 0:
+                idx -= 1
+        imgui.end()
 
         gl.glClearColor(1, 1, 1, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-        imgui.render()
+        imgui.render()        
         impl.render(imgui.get_draw_data())
-
-        pygame.display.flip()
+        glfw.swap_buffers(window)
+    impl.shutdown()
+    glfw.terminate()
 
 
 """Initialise search parameters"""

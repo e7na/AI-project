@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import time
 import numpy as np
+
 # import sys
 import glfw
 import OpenGL.GL as gl
@@ -158,8 +159,7 @@ def display_sol(frames, initial=0):
 
         imgui.begin(
             "Board",
-            flags=imgui.WINDOW_NO_MOVE
-            | imgui.WINDOW_NO_TITLE_BAR,
+            flags=imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR,
         )
         imgui.columns(width)
         for row in frame:
@@ -176,7 +176,7 @@ def display_sol(frames, initial=0):
                 idx -= 1
         imgui.end()
 
-        imgui.render()        
+        imgui.render()
         impl.render(imgui.get_draw_data())
         glfw.swap_buffers(window)
     impl.shutdown()
@@ -195,9 +195,15 @@ path = []
 start = time.time()
 iteration_limit = 2000
 
-
+print()
 """main search loop"""
-while not frontier.is_empty() and len(explored) < iteration_limit:
+while not frontier.is_empty() and len(explored) <= iteration_limit:
+    # realtime feedback to determine whether it's hung up or not
+    print(
+        f"\033[Ffrontier length: {len(frontier)}"
+        f"\nexplored length: {len(explored)}",
+        end="",
+    )
     # remove a node from the frontier
     current = frontier.remove()
     # add its state to the explored
@@ -236,15 +242,14 @@ if path:
     solution = [node.action for node in path]
     frames = [node.state for node in path]
 
+print("\n")
 if len(explored) >= iteration_limit:
     print("attempt timed out")
 elif not solution:
     print("no solution")
 else:
     print(
-        f"taken time: {round(time.time() - start,5)} seconds"
-        f"\n# of explored nodes: {len(explored)}"
-        f"\nFrontier length = {len(frontier)}"
+        f"search time: {round(time.time() - start,5)} seconds"
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )

@@ -29,7 +29,7 @@ with open(input) as p:
         ],
         dtype=np.int8,
     )
-    width, height = puzzle.shape
+    height, width = puzzle.shape
 
 
 # check if the current state is the goal state

@@ -1,6 +1,7 @@
 import glfw
 import OpenGL.GL as gl
 
+
 def swap_right(state, slot_coords):
     slot_x, slot_y = slot_coords
     # swap the slot with the block on its left in the row
@@ -54,11 +55,8 @@ def impl_glfw_init(title, size):
     glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_COMPAT_PROFILE)
 
-
     # Create a windowed mode window and its OpenGL context
-    window = glfw.create_window(
-        int(width), int(height), title, None, None
-    )
+    window = glfw.create_window(int(width), int(height), title, None, None)
     glfw.make_context_current(window)
 
     if not window:
@@ -67,4 +65,3 @@ def impl_glfw_init(title, size):
         exit(1)
 
     return window
-

@@ -104,7 +104,7 @@ def children(state):
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
             possible_moves.append(["down", slot_coords])
-        if slot_y < width - 1:  # if the slot is on the 1st or 2nd row
+        if slot_y < height - 1:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
     return possible_moves

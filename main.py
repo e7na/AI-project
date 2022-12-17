@@ -162,18 +162,17 @@ def display_sol(frames, initial=0):
 
         with imgui.begin(
             "Board",
-            flags=imgui.WINDOW_NO_RESIZE
-            | imgui.WINDOW_NO_MOVE
-            | imgui.WINDOW_NO_TITLE_BAR,
+            flags=imgui.WINDOW_NO_TITLE_BAR,
         ):
             imgui.columns(width)
             for row in frame:
-                for block in row:
-                    imgui.text(str(block) if block != SLOT else PLACEHOLDER)
-                    imgui.next_column()
                 imgui.separator()
+                for block in row:
+                    imgui.text(str(block) if block != PLACEHOLDER else SLOT)
+                    imgui.next_column()
             imgui.columns(1)
-            imgui.spacing()
+            imgui.separator()
+            imgui.spacing() ; imgui.spacing() 
             match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
                 case [index, _, _, True] if index < len(frames) - 1:
                     idx += 1
@@ -184,7 +183,6 @@ def display_sol(frames, initial=0):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
         imgui.render()
         impl.render(imgui.get_draw_data())
-
         pygame.display.flip()
 
 

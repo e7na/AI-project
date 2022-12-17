@@ -133,6 +133,55 @@ def apply_move(move, state):
     return new_state
 
 
+def display_sol(frames, initial=0):
+    idx = initial
+    size = 500, 500
+
+    pygame.init()
+    pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
+
+    imgui.create_context()
+    impl = PygameRenderer()
+
+    io = imgui.get_io()
+    io.display_size = size
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            impl.process_event(event)
+        imgui.new_frame()
+
+        frame = frames[idx]
+
+        with imgui.begin(
+            "Board",
+            flags=imgui.WINDOW_NO_TITLE_BAR,
+        ):
+            imgui.columns(width)
+            for row in frame:
+                imgui.separator()
+                for block in row:
+                    imgui.text(str(block) if block != PLACEHOLDER else SLOT)
+                    imgui.next_column()
+            imgui.columns(1)
+            imgui.separator()
+            imgui.spacing() ; imgui.spacing() 
+            match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
+                case [index, _, _, True] if index < len(frames) - 1:
+                    idx += 1
+                case [index, True, _, _] if index > 0:
+                    idx -= 1
+
+        gl.glClearColor(1, 1, 1, 1)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+        imgui.render()
+        impl.render(imgui.get_draw_data())
+        pygame.display.flip()
+
+
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 # frontier = StackFrontier()  # DFS

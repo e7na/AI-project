@@ -210,7 +210,7 @@ while not frontier.is_empty() and len(explored) <= iteration_limit:
     # if the current state is the goal, then generate
     # the solution steps list and exit out to print it
     if is_goal(current.state):
-        leaf = current  # parse the solution steps non destructively
+        leaf = current
         while current.parent is not None:
             current.is_sol = 1
             # prepend current.action to the solution list
@@ -218,6 +218,7 @@ while not frontier.is_empty() and len(explored) <= iteration_limit:
             path = [current, *path]
             # then move up the path one step
             current = current.parent
+        path = [current, *path]
         break
 
     ## expanding the node
@@ -251,5 +252,6 @@ else:
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )
-    graph = lv.treeviz(root)
+    graph = lv.objviz(root)
     graph.view()
+    display_sol(frames)

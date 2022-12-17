@@ -4,7 +4,6 @@ import numpy as np
 
 from data_structure import *
 from state_ops import *
-# from gui import *
 from yamete import *
 
 # initializing the puzzle properties
@@ -205,4 +204,3 @@ else:
     )
     graph = lv.treeviz(root)
     graph.view()
-    # display_sol(frames)

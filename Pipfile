@@ -6,8 +6,6 @@ name = "pypi"
 [packages]
 numpy = "*"
 lolviz = "==1.4.4"
-imgui = {extras = ["glfw"], version = "==1.4.1"}
-glfw = "==2.5.5"
 
 [dev-packages]
 

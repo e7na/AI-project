@@ -1,23 +1,27 @@
+import psutil
+import os
 import time
 import numpy as np
 from data_structure import *
 from state_ops import *
 from yamete import *
+from hbd import main
 
 # initializing the puzzle properties
 width, height = 3, 3
 SLOT = -1
 input = "puzzle.txt"
 with open(input) as p:
-    puzzle = p.read().splitlines()
+    prob = p.read().splitlines()
     # convert the board to an integer matrix
     puzzle = np.array(
         [
             [int(element) if element != " " else SLOT for element in row]
-            for row in puzzle
+            for row in prob
         ],
         dtype=np.int8,
     )
+
 
 
 # check if the current state is the goal state
@@ -120,6 +124,37 @@ def apply_move(move, state):
             new_state = initial_state
     return new_state
 
+# this function is for the state display in the decision tree 
+# replacing the -1 with a space
+def n_state(state): 
+    blank_slot = find_slot(state)
+    y, x = blank_slot
+    state = state.astype(str)
+    state[x][y] = " "
+    return state
+
+
+# from numpy array to a transposed list cuz this is the format we using with the gui
+# and i know im DRYing myself here but it's still fine
+def gui_format(state):
+    puz = state.T
+    blank_slot = find_slot(puz)
+    y, x = blank_slot
+    puz = puz.tolist()
+    # map(str, state)
+    puz[x][y] = None
+    return puz
+
+# DUUUUUUUUUUDE!!!
+# this one is to traverse the whole tree and change the states inside
+def trav(r):
+    if r.parent is None:
+        r.state = n_state(r.state)
+    if r.children is not None:
+        for child in r.children:
+            child.state = n_state(child.state)
+            trav(child)
+
 
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
@@ -131,6 +166,7 @@ explored = []
 solution = []
 start = time.time()
 iteration_limit = 2000
+gui_state = gui_format(root.state)
 
 
 """main search loop"""
@@ -180,5 +216,12 @@ else:
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )
+    trav(root)
     graph = lv.treeviz(root)
+    # closing ur pdf service if u forgot to close it before running
+    for proc in psutil.process_iter():
+        if proc.name().find('PDF') > -1:
+            proc.kill()
+
     graph.view()
+    main(solution,gui_state)

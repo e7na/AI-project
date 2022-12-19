@@ -1,11 +1,10 @@
 import psutil
-import os
 import time
 import numpy as np
 from data_structure import *
 from state_ops import *
 from yamete import *
-from hbd import main
+# from GUI_hbd import main as draw
 
 # initializing the puzzle properties
 width, height = 3, 3
@@ -21,6 +20,17 @@ with open(input) as p:
         ],
         dtype=np.int8,
     )
+
+def extracting_puzzle(state):
+    puzzle = np.array(
+        [
+            [int(element) if element != None else SLOT for element in row]
+            for row in state
+        ],
+        dtype=np.int8,
+    )
+    puzzle = puzzle.T
+    return puzzle
 
 
 
@@ -155,73 +165,80 @@ def trav(r):
             child.state = n_state(child.state)
             trav(child)
 
-
-"""Initialise search parameters"""
-root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-# frontier = StackFrontier()  # BFS
-# frontier = QueueFrontier()  # DFS
-frontier = GBFSFrontier()  # GBFS
-frontier.add(root)
-explored = []
-solution = []
-start = time.time()
-iteration_limit = 2000
-gui_state = gui_format(root.state)
+# switching searching algorithms
+switcher = {
+    'GBFS': GBFSFrontier(),
+    'BFS': QueueFrontier(),
+    'DFS': StackFrontier()
+}
 
 
-"""main search loop"""
-while not frontier.is_empty() and len(explored) < iteration_limit:
-    # remove a node from the frontier
-    current = frontier.remove()
-    # add its state to the explored
-    explored.append(current.state)
+def main(puzzle, alg='GBFS'):
+    state = extracting_puzzle(puzzle)
+    root = Node(state=state, parent=None, action=None, is_sol=1)
+    frontier = switcher.get(alg)
+    frontier.add(root)
+    explored = []
+    solution = []
+    start = time.time()
+    iteration_limit = 100
+    gui_state = gui_format(root.state)
+    while not frontier.is_empty() and len(explored) < iteration_limit:
+        # remove a node from the frontier
+        current = frontier.remove()
+        # add its state to the explored
+        explored.append(current.state)
 
-    # if the current state is the goal, then generate
-    # the solution steps list and exit out to print it
-    if is_goal(current.state):
-        while current.parent is not None:
-            current.is_sol = 1
-            # prepend current.action to the solution list
-            solution = [current.action, *solution]
-            # then move up the path one step
-            current = current.parent
-        break
+        # if the current state is the goal, then generate
+        # the solution steps list and exit out to print it
+        if is_goal(current.state):
+            while current.parent is not None:
+                current.is_sol = 1
+                # prepend current.action to the solution list
+                solution = [current.action, *solution]
+                # then move up the path one step
+                current = current.parent
+            frontier.__del__()
+            break
 
-    ## expanding the node
-    # for each possible move from the current state
-    for possible_move in children(current.state):
-        new_guess = apply_move(possible_move, current.state)
-        # if the state resulting from this move is neither explored nor in the frontier
-        in_explored = any((new_guess == state).all() for state in explored)
-        if not frontier.contains_state(new_guess) and not in_explored:
-            # then put it in a new node and add it to the frontier
-            child = Node(
-                state=new_guess,
-                parent=current,
-                action=possible_move[0],
-                heuristic=distance(new_guess),
-            )
-            frontier.add(child)
+        ## expanding the node
+        # for each possible move from the current state
+        for possible_move in children(current.state):
+            new_guess = apply_move(possible_move, current.state)
+            # if the state resulting from this move is neither explored nor in the frontier
+            in_explored = any((new_guess == state).all() for state in explored)
+            if not frontier.contains_state(new_guess) and not in_explored:
+                # then put it in a new node and add it to the frontier
+                child = Node(
+                    state=new_guess,
+                    parent=current,
+                    action=possible_move[0],
+                    heuristic=distance(new_guess),
+                )
+                frontier.add(child)
 
 
-if len(explored) >= iteration_limit:
-    print("attempt timed out")
-elif not solution:
-    print("no solution")
-else:
-    print(
-        f"taken time: {round(time.time() - start,5)} seconds"
-        f"\n# of explored nodes: {len(explored)}"
-        f"\nFrontier length = {len(frontier)}"
-        f"\n# of solution steps = {len(solution)}"
-        f"\nsolution: {solution}"
-    )
-    trav(root)
-    graph = lv.treeviz(root)
-    # closing ur pdf service if u forgot to close it before running
-    for proc in psutil.process_iter():
-        if proc.name().find('PDF') > -1:
-            proc.kill()
+    if len(explored) >= iteration_limit:
+        print("attempt timed out")
+    elif not solution:
+        print("no solution")
+    else:
+        print(
+            f"taken time: {round(time.time() - start,5)} seconds"
+            f"\n# of explored nodes: {len(explored)}"
+            f"\nFrontier length = {len(frontier)}"
+            f"\n# of solution steps = {len(solution)}"
+            f"\nsolution: {solution}"
+        )
+        trav(root)
+        graph = lv.treeviz(root)
+        # closing ur pdf service if u forgot to close it before running
+        for proc in psutil.process_iter():
+            if proc.name().find('PDF') > -1:
+                proc.kill()
 
-    graph.view()
-    main(solution,gui_state)
+        graph.view()
+        return solution
+        
+if __name__ == '__main__':
+    main(puzzle=[[1, None, 4], [2, 5, 7], [3, 6, 8]])

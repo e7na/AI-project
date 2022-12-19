@@ -28,7 +28,7 @@ class Node:
             self.children.append(child)
 
             
-# for the DFS
+# for the BFS or dijkstra
 class QueueFrontier:
     def __init__(self):
         self.frontier = []
@@ -46,6 +46,9 @@ class QueueFrontier:
         # add to the top of the stack, which is the end of the array
         self.frontier.append(state)
 
+    def __del__(self):
+        self.frontier = []
+
     def remove(self):  # FIFO
         if not self.is_empty():
             # take out the queue's head; the array's first element
@@ -59,13 +62,15 @@ class QueueFrontier:
 # for the GBFS or A*
 class GBFSFrontier(QueueFrontier):
     def remove(self):  # greedy
+        # print("---------")
         # sort the frontier by path cost
+        
         self.frontier.sort(key=lambda node: node.heuristic)
         # then take out the cheapest, first element and return it
         return super().remove()
 
 
-# for the BFS or dijkstra
+# for the DFS
 class StackFrontier(QueueFrontier):
     def remove(self):  # LIFO
         if not self.is_empty():

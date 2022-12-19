@@ -5,6 +5,7 @@
 
 import pygame, sys, random
 from pygame.locals import *
+from main import main as maze
 
 # Create the constants (go ahead and experiment with different values)
 BOARDWIDTH = 3 # number of columns in the board
@@ -27,7 +28,7 @@ COL = (85, 0, 42)
 BGCOLOR = HOT_PINK
 TILECOLOR = COL
 TEXTCOLOR = WHITE
-BORDERCOLOR = BRIGHTBLUE
+BORDERCOLOR = BLACK
 BASICFONTSIZE = 20
 
 BUTTONCOLOR = WHITE
@@ -42,9 +43,14 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
-# solution = ['up','left','left']
 def main(solution, state):
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, RESET_SURF, RESET_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT, NEXT_SURF, NEXT_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, AUTO_SURF, AUTO_RECT, ALG_SURF, ALG_RECT, SOLVE_SURF, SOLVE_RECT, NEXT_SURF, NEXT_RECT, BACK_SURF, BACK_RECT, RAND_SURF, RAND_RECT
+
+    solution_index = 0
+    auto = False # false for manual (enables the back and next buttons)
+    solved = True
+    current_index, ALG_CHOICES = 0, ['GBFS', 'BFS', 'DFS']
+    steps_remaining = 0
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -53,29 +59,39 @@ def main(solution, state):
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Store the option buttons and their rectangles in OPTIONS.
-    RESET_SURF, RESET_RECT = makeText('Reset',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 120)
-    NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
-    SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
-    NEXT_SURF, NEXT_RECT = makeText('Next',    TEXTCOLOR, TILECOLOR, 30, WINDOWHEIGHT - 30)
+    AUTO_SURF, AUTO_RECT = makeText('Reset',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 120)
+    RAND_SURF, RAND_RECT = makeText('Randomize',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    ALG_SURF,   ALG_RECT   = makeText(ALG_CHOICES[current_index], TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
+    NEXT_SURF, NEXT_RECT = makeText('Next',    TEXTCOLOR, BGCOLOR, 130, WINDOWHEIGHT - 30)
+    BACK_SURF, BACK_RECT = makeText('Back',    TEXTCOLOR, BGCOLOR, 30, WINDOWHEIGHT - 30)
 
-    # creating a random state with 10 moves
-    # mainBoard, solutionSeq = generateNewPuzzle(1)
-    mainBoard, solutionSeq = generateNewPuzzle(state)
+    mainBoard = generateNewPuzzle(state)
     # returns a list with the solution state
     SOLVEDBOARD = getStartingBoard() # a solved board is the same as the board in a start state.
-    allMoves = [] # list of moves made from the solved configuration
-    i = 0
-    status = 0 # 1 for manual 0 for auto
+
     while True: # main game loop
-        steps_remaining = len(solution) - i
-        steps_remaining_msg = f'Steps: {steps_remaining}'
-        drawBoard(mainBoard, steps_remaining_msg)
+        # updating the title of these buttons
+        ALG_SURF, ALG_RECT = makeText(ALG_CHOICES[current_index], TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+        AUTO_SURF, AUTO_RECT = makeText(f'Auto:{auto}',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 120)
+        if solution is None:
+            steps_remaining_msg = 'ERROR:exceeded the 2kk iterations limit!!!'
+            drawBoard(mainBoard, steps_remaining_msg)
+        else:
+            # this ckeck is to not update the msg if it's less than 0 which means i have another msg i wanna display feel free to delete it anyway
+            if steps_remaining >= 0:
+                steps_remaining = len(solution) - solution_index
+            if steps_remaining == 0:
+                steps_remaining_msg = 'GG!'
+            elif steps_remaining > 0:
+                steps_remaining_msg = f'Steps: {steps_remaining}'
+            drawBoard(mainBoard, steps_remaining_msg)
+            if solution_index < len(solution) and auto:
+                slideAnimation(mainBoard, solution[solution_index], steps_remaining_msg, 8)
+                makeMove(mainBoard, solution[solution_index])
+                solution_index += 1
         
         checkForQuit()
-        if i < len(solution) and status == 0:
-            slideAnimation(mainBoard, solution[i], steps_remaining_msg, 8)
-            makeMove(mainBoard, solution[i])
-            i += 1
 
         for event in pygame.event.get():
             if event.type == MOUSEBUTTONUP:
@@ -83,54 +99,31 @@ def main(solution, state):
 
                 if (spotx, spoty) == (None, None):
 
-                    if NEXT_RECT.collidepoint(event.pos) and status == 1 and i < len(solution):             
-                        slideAnimation(mainBoard, solution[i], steps_remaining_msg, 8)
-                        makeMove(mainBoard, solution[i])
-                        i += 1
+                    if NEXT_RECT.collidepoint(event.pos) and not auto and solution_index < len(solution) and solved:             
+                        slideAnimation(mainBoard, solution[solution_index], steps_remaining_msg, 8)
+                        makeMove(mainBoard, solution[solution_index])
+                        solution_index += 1
+                    elif BACK_RECT.collidepoint(event.pos) and not auto and 0 < solution_index <= len(solution):             
+                        slideAnimation(mainBoard, opposite(solution[solution_index-1]), steps_remaining_msg, 8)
+                        makeMove(mainBoard, opposite(solution[solution_index-1]))
+                        solution_index -= 1
+                    elif RAND_RECT.collidepoint(event.pos):             
+                        mainBoard = generateNewPuzzle(4)
+                        solved = False
+                        steps_remaining_msg = 'press Solve to begin the visualization ;)'
+                        steps_remaining = -1
+                    elif SOLVE_RECT.collidepoint(event.pos) and mainBoard != SOLVEDBOARD:
+                        solution = maze(mainBoard, alg=ALG_CHOICES[current_index])
+                        print(solution)
+                        solution_index = 0
+                        solved = True
+                    elif ALG_RECT.collidepoint(event.pos):
+                        current_index = (current_index + 1)%3
+                        print(f'current: {ALG_CHOICES[current_index]}')
+                        solved = False
+                    elif AUTO_RECT.collidepoint(event.pos):
+                        auto = not auto
 
-        # for event in pygame.event.get(): # event handling loop
-        #     if event.type == MOUSEBUTTONUP:
-        #         spotx, spoty = getSpotClicked(mainBoard, event.pos[0], event.pos[1])
-
-        #         if (spotx, spoty) == (None, None):
-        #             # check if the user clicked on an option button
-        #             if RESET_RECT.collidepoint(event.pos):
-        #                 resetAnimation(mainBoard, allMoves) # clicked on Reset button
-        #                 allMoves = []
-        #             elif NEW_RECT.collidepoint(event.pos):
-        #                 mainBoard, solutionSeq = generateNewPuzzle(80) # clicked on New Game button
-        #                 allMoves = []
-        #             elif SOLVE_RECT.collidepoint(event.pos):
-        #                 resetAnimation(mainBoard, solutionSeq + allMoves) # clicked on Solve button
-        #                 allMoves = []
-        #         else:
-        #             # check if the clicked tile was next to the blank spot
-
-        #             blankx, blanky = getBlankPosition(mainBoard)
-        #             if spotx == blankx + 1 and spoty == blanky:
-        #                 slideTo = LEFT
-        #             elif spotx == blankx - 1 and spoty == blanky:
-        #                 slideTo = RIGHT
-        #             elif spotx == blankx and spoty == blanky + 1:
-        #                 slideTo = UP
-        #             elif spotx == blankx and spoty == blanky - 1:
-        #                 slideTo = DOWN
-
-        #     elif event.type == KEYUP:
-        #         # check if the user pressed a key to slide a tile
-        #         if event.key in (K_LEFT, K_a) and isValidMove(mainBoard, LEFT):
-        #             slideTo = LEFT
-        #         elif event.key in (K_RIGHT, K_d) and isValidMove(mainBoard, RIGHT):
-        #             slideTo = RIGHT
-        #         elif event.key in (K_UP, K_w) and isValidMove(mainBoard, UP):
-        #             slideTo = UP
-        #         elif event.key in (K_DOWN, K_s) and isValidMove(mainBoard, DOWN):
-        #             slideTo = DOWN
-        # # the state transition
-        # if slideTo:
-        #     slideAnimation(mainBoard, slideTo, 'Click tile or press arrow keys to slide.', 8) # show slide on screen
-        #     makeMove(mainBoard, slideTo)
-        #     allMoves.append(slideTo) # record the slide
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -147,6 +140,16 @@ def checkForQuit():
         if event.key == K_ESCAPE:
             terminate() # terminate if the KEYUP event was for the Esc key
         pygame.event.post(event) # put the other KEYUP event objects back
+
+
+def opposite(move):
+    switch={
+        UP: DOWN,
+        DOWN: UP,
+        LEFT: RIGHT,
+        RIGHT: LEFT
+    }
+    return switch.get(move)
 
 
 def getStartingBoard():
@@ -267,10 +270,12 @@ def drawBoard(board, message):
     height = BOARDHEIGHT * TILESIZE
     pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (left - 5, top - 5, width + 11, height + 11), 4)
 
-    DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
-    DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
+    DISPLAYSURF.blit(AUTO_SURF, AUTO_RECT)
+    DISPLAYSURF.blit(RAND_SURF, RAND_RECT)
+    DISPLAYSURF.blit(ALG_SURF, ALG_RECT)
     DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)
     DISPLAYSURF.blit(NEXT_SURF, NEXT_RECT)
+    DISPLAYSURF.blit(BACK_SURF, BACK_RECT)
 
 
 def slideAnimation(board, direction, message, animationSpeed):
@@ -315,14 +320,14 @@ def slideAnimation(board, direction, message, animationSpeed):
 
 
 def generateNewPuzzle(numSlides):   
-    # From a starting configuration, make numSlides number of moves (and
-    # animate these moves).
-    sequence = []
+    # num slide can be  of 2:
+    # 1- a state so u just need to draw it
     if type(numSlides) == list:
         board = numSlides
         drawBoard(board, '')
         pygame.display.update()
-        return (board,sequence)
+        return board
+    # an integer that u want to generate a random state with the steps is that number
     else:
         board = getStartingBoard()
         drawBoard(board, '')
@@ -333,28 +338,11 @@ def generateNewPuzzle(numSlides):
             move = getRandomMove(board, lastMove)
             slideAnimation(board, move, 'Generating new puzzle...', animationSpeed=TILESIZE // 3)
             makeMove(board, move)
-            sequence.append(move)
             lastMove = move
-        return (board, sequence)
+        return board
 
-
-def resetAnimation(board, allMoves):
-    # make all of the moves in allMoves in reverse.
-    revAllMoves = allMoves[:] # gets a copy of the list
-    revAllMoves.reverse()
-
-    for move in revAllMoves:
-        if move == UP:
-            oppositeMove = DOWN
-        elif move == DOWN:
-            oppositeMove = UP
-        elif move == RIGHT:
-            oppositeMove = LEFT
-        elif move == LEFT:
-            oppositeMove = RIGHT
-        slideAnimation(board, oppositeMove, '', animationSpeed=int(TILESIZE / 2))
-        makeMove(board, oppositeMove)
-
-
+# if u wanna customize the puzzle from a txt file HERE instead of giving a state 
 if __name__ == '__main__':
-    main(['up','left','left'], [[1, BLANK, 4], [2, 5, 7], [3, 6, 8]])
+    state = [[1, BLANK, 4], [2, 5, 7], [3, 6, 8]]
+    so = maze(puzzle=state,alg='GBFS')
+    main(so,state)

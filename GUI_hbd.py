@@ -6,6 +6,7 @@
 import pygame, sys, random
 from pygame.locals import *
 from main import main as maze
+import numpy as np
 
 # Create the constants (go ahead and experiment with different values)
 BOARDWIDTH = 3 # number of columns in the board
@@ -322,7 +323,7 @@ def slideAnimation(board, direction, message, animationSpeed):
 def generateNewPuzzle(numSlides):   
     # num slide can be  of 2:
     # 1- a state so u just need to draw it
-    if type(numSlides) == list:
+    if type(numSlides) == list: # bgad??????
         board = numSlides
         drawBoard(board, '')
         pygame.display.update()
@@ -342,7 +343,14 @@ def generateNewPuzzle(numSlides):
         return board
 
 # if u wanna customize the puzzle from a txt file HERE instead of giving a state 
-if __name__ == '__main__':
-    state = [[1, BLANK, 4], [2, 5, 7], [3, 6, 8]]
+if __name__ == '__main__':    
+    # state = [[1, BLANK, 4], [2, 5, 7], [3, 6, 8]]
+
+    with open("./puzzle.txt") as p:
+        prob = p.read().splitlines()
+        state = np.array([
+                [int(element) if element != " " else BLANK for element in row]
+                for row in prob
+            ], dtype=object).transpose().tolist()
     so = maze(puzzle=state,alg='GBFS')
     main(so,state)

@@ -1,4 +1,4 @@
-import psutil
+# import psutil
 import time
 import numpy as np
 from data_structure import *
@@ -181,7 +181,7 @@ def main(puzzle, alg='GBFS'):
     explored = []
     solution = []
     start = time.time()
-    iteration_limit = 100
+    iteration_limit = 2000
     gui_state = gui_format(root.state)
     while not frontier.is_empty() and len(explored) < iteration_limit:
         # remove a node from the frontier
@@ -233,9 +233,9 @@ def main(puzzle, alg='GBFS'):
         trav(root)
         graph = lv.treeviz(root)
         # closing ur pdf service if u forgot to close it before running
-        for proc in psutil.process_iter():
-            if proc.name().find('PDF') > -1:
-                proc.kill()
+        # for proc in psutil.process_iter():
+        #     if proc.name().find('PDF') > -1:
+        #         proc.kill()
 
         graph.view()
         return solution

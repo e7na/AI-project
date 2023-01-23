@@ -212,14 +212,16 @@ def display_sol(page: Page):
     page.vertical_alignment = "center"
     # for (x,y), value in np.ndenumerate(frames):
     blocks = [
-        TextField(value=value,text_align="center", width=100, disabled=True)
-        for _,value in np.ndenumerate(frames[idx])
+        [
+            TextField(value=value,text_align="center", width=100, disabled=True)
+            for value in row
+        ] for row in frames[idx]
     ] 
 
     def repopulate():
         nonlocal blocks
         for (x,y), value in np.ndenumerate(frames[idx]):
-            blocks[x*width + y].value = str(value)
+            blocks[x][y].value = str(value)
         page.update()
 
     def nextA(e):
@@ -234,39 +236,14 @@ def display_sol(page: Page):
             idx -= 1
             repopulate()
     
-    txt = iter(blocks)
-    page.add(
-        Column([
-        Row(
-            [
-                next(txt),
-                next(txt),
-                next(txt),
-            ],
-            alignment="center",
-        ),
-        Row(
-            [
-                next(txt),
-                next(txt),
-                next(txt),
-            ],
-            alignment="center",
-        ),
-        Row(
-            [
-                next(txt),
-                next(txt),
-                next(txt),
-            ],
-            alignment="center",
-        ),
-        Row([
-            ElevatedButton("Previous", on_click=PrevA),
-        ElevatedButton("Next", on_click=nextA)
-        ],alignment="center"
-        )
-        ]
-    ))
+    page.add(*[Row([
+                txt for txt in row
+            ]) for row in blocks])
+            
+    page.add(Row(
+            [    
+                ElevatedButton("Previous", on_click=PrevA),
+                ElevatedButton("Next", on_click=nextA)
+            ],alignment="center"))  # javascript mode
 
 app(target=display_sol, port=8550)

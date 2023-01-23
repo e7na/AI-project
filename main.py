@@ -219,21 +219,14 @@ def display_sol(page: Page):
             for block in row
         ] for row in frames[idx]]
 
-
     def repopulate():
-        update_count()
+        completed.current.value = f"step {idx+1} of {len(frames)}"
         nonlocal blocks
         for (x,y), block in np.ndenumerate(frames[idx]):
             blocks[x][y].value = str(value(block))
         page.update()
-
-    def update_count():
-        completed.current.value = f"step {idx+1} of {len(frames)}"
-        page.update()
-    # update_count()
     
     def nextA(e):
-        update_count()
         nonlocal idx
         if idx < len(frames) - 1:
             idx += 1
@@ -244,7 +237,7 @@ def display_sol(page: Page):
 
     def PrevA(e):
         nonlocal idx
-        if idx >0:
+        if idx > 0:
             idx -= 1
             repopulate()
     

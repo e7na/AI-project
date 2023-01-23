@@ -204,7 +204,8 @@ else:
         f"\nsolution: {solution}"
     )
     graph = lv.objviz(root)
-    #graph.view()
+    # graph.view()
+
 
 def display_sol(page: Page):
     idx = 0
@@ -213,14 +214,15 @@ def display_sol(page: Page):
     # for (x,y), value in np.ndenumerate(frames):
     blocks = [
         [
-            TextField(value=value,text_align="center", width=100, disabled=True)
+            TextField(value=value, text_align="center", width=100, disabled=True)
             for value in row
-        ] for row in frames[idx]
-    ] 
+        ]
+        for row in frames[idx]
+    ]
 
     def repopulate():
         nonlocal blocks
-        for (x,y), value in np.ndenumerate(frames[idx]):
+        for (x, y), value in np.ndenumerate(frames[idx]):
             blocks[x][y].value = str(value)
         page.update()
 
@@ -232,18 +234,21 @@ def display_sol(page: Page):
 
     def PrevA(e):
         nonlocal idx
-        if idx >0:
+        if idx > 0:
             idx -= 1
             repopulate()
-    
-    page.add(*[Row([
-                txt for txt in row
-            ]) for row in blocks])
-            
-    page.add(Row(
-            [    
+
+    page.add(*[Row([txt for txt in row]) for row in blocks])
+
+    page.add(
+        Row(
+            [
                 ElevatedButton("Previous", on_click=PrevA),
-                ElevatedButton("Next", on_click=nextA)
-            ],alignment="center"))  # javascript mode
+                ElevatedButton("Next", on_click=nextA),
+            ],
+            alignment="center",
+        )
+    )  # javascript mode
+
 
 app(target=display_sol, port=8550)

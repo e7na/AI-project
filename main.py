@@ -1,5 +1,7 @@
 import time
 import numpy as np
+import flet as ft
+from flet import *
 from data_structure import *
 from util import *
 from yamete import *
@@ -131,18 +133,6 @@ def apply_move(move, state):
     return new_state
 
 
-def display_sol(frames, initial=0):
-    """
-    The project creates an array of all board states along the solution path:
-    in the shape
-        frames: [
-            [[int, int, int],    [[int, int, int],  [[int, int, int],
-             [int, int, int],     [int, int, int],   [int, int, int],
-             [int, int, int]],    [int, int, int]],  [int, int, int]],
-        ]
-    """
-
-
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
 # frontier = StackFrontier()  # DFS
@@ -214,5 +204,71 @@ else:
         f"\nsolution: {solution}"
     )
     graph = lv.objviz(root)
-    graph.view()
-    display_sol(frames)
+    #graph.view()
+
+def display_sol(page: Page):
+    index = 0
+    page.title = "Flet Sliding Puzzle"
+    page.vertical_alignment = "center"
+    
+    def nextA(index):
+        index += 1
+        page.update()
+    
+    def PrevA(index):
+        index -= 1
+        page.update()
+
+    txt_number0 = TextField(value=frames[index][0][0], text_align="center", width=100, disabled=True)
+    txt_number1 = TextField(value=frames[index][0][1], text_align="center", width=100, disabled=True)
+    txt_number2 = TextField(value=frames[index][0][2], text_align="center", width=100, disabled=True)
+    txt_number3 = TextField(value=frames[index][1][0], text_align="center", width=100, disabled=True)
+    txt_number4 = TextField(value=frames[index][1][1], text_align="center", width=100, disabled=True)
+    txt_number5 = TextField(value=frames[index][1][2], text_align="center", width=100, disabled=True)
+    txt_number6 = TextField(value=frames[index][2][0], text_align="center", width=100, disabled=True)
+    txt_number7 = TextField(value=frames[index][2][1], text_align="center", width=100, disabled=True)
+    txt_number8 = TextField(value=frames[index][2][2], text_align="center", width=100, disabled=True)
+
+    page.add(
+        Column([Row(
+            [
+                txt_number0,
+                txt_number1,
+                txt_number2,
+            ],
+            alignment="center",
+        ),
+        Row(
+            [
+                txt_number3,
+                txt_number4,
+                txt_number5,
+            ],
+            alignment="center",
+        ),
+        Row(
+            [
+                txt_number6,
+                txt_number7,
+                txt_number8,
+            ],
+            alignment="center",
+        ),
+        Row([
+            ElevatedButton("Previous", on_click=PrevA),
+        ElevatedButton("Next", on_click=nextA)
+        ],alignment="center"
+        )
+        ]
+    ))
+    """
+    The project creates an array of all board states along the solution path:
+    in the shape
+        frames: [
+            [[int, int, int],    [[int, int, int],  [[int, int, int],
+             [int, int, int],     [int, int, int],   [int, int, int],
+             [int, int, int]],    [int, int, int]],  [int, int, int]],
+        ]
+    """
+
+flet.app(target=display_sol, port=8550)

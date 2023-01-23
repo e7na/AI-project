@@ -279,7 +279,7 @@ def display_sol(page: Page):
             alignment="center",
         ),
         Row([
-            ElevatedButton("Previous", on_click=PrevA),
+            ElevatedButton("Previous", on_click=PrevA(idx)),
         ElevatedButton("Next", on_click=nextA(idx))
         ],alignment="center"
         )

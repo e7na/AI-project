@@ -6,8 +6,8 @@ name = "pypi"
 [packages]
 numpy = "*"
 lolviz = "==1.4.4"
-pygame = "*"
-imgui = {extras = ["pygame"], ref = "dev/version-2.0", git = "https://github.com/pyimgui/pyimgui.git"}
+glfw = "*"
+imgui = {extras = ["glfw"], ref = "dev/version-2.0", git = "https://github.com/pyimgui/pyimgui.git"}
 
 [dev-packages]
 

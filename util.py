@@ -37,31 +37,3 @@ def swap_down(state, slot_coords):
         state[slot_y, slot_x],
     )
     return state
-
-def impl_glfw_init(title, size):
-    width, height = size
-    # title = "minimal ImGui/GLFW3 example"
-
-    if not glfw.init():
-        print("Could not initialize OpenGL context")
-        exit(1)
-
-    glfw.window_hint(glfw.FOCUSED, glfw.FALSE)
-    glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
-    glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
-    glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-    # glfw.window_hint(glfw.RESIZABLE, 1)
-    glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, 1)
-    glfw.window_hint(glfw.SCALE_TO_MONITOR, 1)
-    glfw.window_hint(glfw.DECORATED, 0)
-    # glfw.window_hint(glfw.VISIBLE, 0)
-    # Create a windowed mode window and its OpenGL context
-    window = glfw.create_window(int(width), int(height), title, None, None)
-    glfw.make_context_current(window)
-
-    if not window:
-        glfw.terminate()
-        print("Could not initialize Window")
-        exit(1)
-
-    return window

@@ -10,7 +10,6 @@ from yamete import *
 SLOT = "  "
 SEPARATOR = "|"
 PLACEHOLDER = -1
-value = lambda s: s if s!=PLACEHOLDER else SLOT
 
 input = "puzzle.txt"
 with open(input) as p:
@@ -19,7 +18,7 @@ with open(input) as p:
     puzzle = np.array(
         [
             [
-                int(value(element))
+                int(element) if element != SLOT else PLACEHOLDER
                 for element in row.split(SEPARATOR)
             ]
             for row in puzzle
@@ -211,6 +210,7 @@ def display_sol(page: Page):
     idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
+    value = lambda s: s if s!=PLACEHOLDER else SLOT
     completed = ft.Ref[ft.Text]()
 
     blocks = [[

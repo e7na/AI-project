@@ -221,37 +221,27 @@ def display_sol(page: Page):
     txt_number7 = TextField(value=frames[idx][2][1], text_align="center", width=100, disabled=True)
     txt_number8 = TextField(value=frames[idx][2][2], text_align="center", width=100, disabled=True)
 
-    def nextA(idx):
-        if not idx: idx=0
-        idx = idx + 1
-        def AAAAAA(e):
-            txt_number0.value = str(frames[idx][0][0])
-            txt_number1.value = str(frames[idx][0][1])
-            txt_number2.value = str(frames[idx][0][2])
-            txt_number3.value = str(frames[idx][1][0])
-            txt_number4.value = str(frames[idx][1][1])
-            txt_number5.value = str(frames[idx][1][2])
-            txt_number6.value = str(frames[idx][2][0])
-            txt_number7.value = str(frames[idx][2][1])
-            txt_number8.value = str(frames[idx][2][2])
-            page.update()
-        return AAAAAA
+    def repopulate():
+        txt_number0.value = str(frames[idx][0][0])
+        txt_number1.value = str(frames[idx][0][1])
+        txt_number2.value = str(frames[idx][0][2])
+        txt_number3.value = str(frames[idx][1][0])
+        txt_number4.value = str(frames[idx][1][1])
+        txt_number5.value = str(frames[idx][1][2])
+        txt_number6.value = str(frames[idx][2][0])
+        txt_number7.value = str(frames[idx][2][1])
+        txt_number8.value = str(frames[idx][2][2])
+        page.update()
 
-    def PrevA(idx):
-        if not idx: idx=0
+    def nextA(e):
+        nonlocal idx
+        idx = idx + 1
+        repopulate()
+
+    def PrevA(e):
+        nonlocal idx
         idx = idx - 1
-        def AAAAAA(e):
-            txt_number0.value = str(frames[idx][0][0])
-            txt_number1.value = str(frames[idx][0][1])
-            txt_number2.value = str(frames[idx][0][2])
-            txt_number3.value = str(frames[idx][1][0])
-            txt_number4.value = str(frames[idx][1][1])
-            txt_number5.value = str(frames[idx][1][2])
-            txt_number6.value = str(frames[idx][2][0])
-            txt_number7.value = str(frames[idx][2][1])
-            txt_number8.value = str(frames[idx][2][2])  
-            page.update()
-        return AAAAAA
+        repopulate()
     
     page.add(
         Column([Row(
@@ -279,8 +269,8 @@ def display_sol(page: Page):
             alignment="center",
         ),
         Row([
-            ElevatedButton("Previous", on_click=PrevA(idx)),
-        ElevatedButton("Next", on_click=nextA(idx))
+            ElevatedButton("Previous", on_click=PrevA),
+        ElevatedButton("Next", on_click=nextA)
         ],alignment="center"
         )
         ]

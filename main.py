@@ -77,7 +77,7 @@ def distance(state):
 # locate the empty slot, and return its coordinates
 def find_slot(state):
     slot_coords = [
-        [col_number, row_number]
+        (col_number, row_number)
         for (row_number, col_number), block in np.ndenumerate(state)
         if block == PLACEHOLDER
     ][0]

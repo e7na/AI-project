@@ -238,7 +238,7 @@ while not frontier.is_empty() and len(explored) <= iteration_limit:
             frontier.add(child)
 
 if path:
-    solution = [node.action for node in path]
+    solution = [node.action for node in path if node.action is not None]
     frames = [node.state for node in path]
 
 print("\n")

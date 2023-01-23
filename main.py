@@ -207,28 +207,52 @@ else:
     #graph.view()
 
 def display_sol(page: Page):
-    index = 0
+    idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
     
-    def nextA(index):
-        index += 1
-        page.update()
+    txt_number0 = TextField(value=frames[idx][0][0], text_align="center", width=100, disabled=True)
+    txt_number1 = TextField(value=frames[idx][0][1], text_align="center", width=100, disabled=True)
+    txt_number2 = TextField(value=frames[idx][0][2], text_align="center", width=100, disabled=True)
+    txt_number3 = TextField(value=frames[idx][1][0], text_align="center", width=100, disabled=True)
+    txt_number4 = TextField(value=frames[idx][1][1], text_align="center", width=100, disabled=True)
+    txt_number5 = TextField(value=frames[idx][1][2], text_align="center", width=100, disabled=True)
+    txt_number6 = TextField(value=frames[idx][2][0], text_align="center", width=100, disabled=True)
+    txt_number7 = TextField(value=frames[idx][2][1], text_align="center", width=100, disabled=True)
+    txt_number8 = TextField(value=frames[idx][2][2], text_align="center", width=100, disabled=True)
+
+    def nextA(idx):
+        if not idx: idx=0
+        idx = idx + 1
+        def AAAAAA(e):
+            txt_number0.value = str(frames[idx][0][0])
+            txt_number1.value = str(frames[idx][0][1])
+            txt_number2.value = str(frames[idx][0][2])
+            txt_number3.value = str(frames[idx][1][0])
+            txt_number4.value = str(frames[idx][1][1])
+            txt_number5.value = str(frames[idx][1][2])
+            txt_number6.value = str(frames[idx][2][0])
+            txt_number7.value = str(frames[idx][2][1])
+            txt_number8.value = str(frames[idx][2][2])
+            page.update()
+        return AAAAAA
+
+    def PrevA(idx):
+        if not idx: idx=0
+        idx = idx - 1
+        def AAAAAA(e):
+            txt_number0.value = str(frames[idx][0][0])
+            txt_number1.value = str(frames[idx][0][1])
+            txt_number2.value = str(frames[idx][0][2])
+            txt_number3.value = str(frames[idx][1][0])
+            txt_number4.value = str(frames[idx][1][1])
+            txt_number5.value = str(frames[idx][1][2])
+            txt_number6.value = str(frames[idx][2][0])
+            txt_number7.value = str(frames[idx][2][1])
+            txt_number8.value = str(frames[idx][2][2])  
+            page.update()
+        return AAAAAA
     
-    def PrevA(index):
-        index -= 1
-        page.update()
-
-    txt_number0 = TextField(value=str(frames[index][0][0]), text_align="center", width=100, disabled=True)
-    txt_number1 = TextField(value=str(frames[index][0][1]), text_align="center", width=100, disabled=True)
-    txt_number2 = TextField(value=str(frames[index][0][2]), text_align="center", width=100, disabled=True)
-    txt_number3 = TextField(value=str(frames[index][1][0]), text_align="center", width=100, disabled=True)
-    txt_number4 = TextField(value=str(frames[index][1][1]), text_align="center", width=100, disabled=True)
-    txt_number5 = TextField(value=str(frames[index][1][2]), text_align="center", width=100, disabled=True)
-    txt_number6 = TextField(value=str(frames[index][2][0]), text_align="center", width=100, disabled=True)
-    txt_number7 = TextField(value=str(frames[index][2][1]), text_align="center", width=100, disabled=True)
-    txt_number8 = TextField(value=str(frames[index][2][2]), text_align="center", width=100, disabled=True)
-
     page.add(
         Column([Row(
             [
@@ -256,19 +280,10 @@ def display_sol(page: Page):
         ),
         Row([
             ElevatedButton("Previous", on_click=PrevA),
-        ElevatedButton("Next", on_click=nextA)
+        ElevatedButton("Next", on_click=nextA(idx))
         ],alignment="center"
         )
         ]
     ))
-    """
-    The project creates an array of all board states along the solution path:
-    in the shape
-        frames: [
-            [[int, int, int],    [[int, int, int],  [[int, int, int],
-             [int, int, int],     [int, int, int],   [int, int, int],
-             [int, int, int]],    [int, int, int]],  [int, int, int]],
-        ]
-    """
 
 app(target=display_sol, port=8550)

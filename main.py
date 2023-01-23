@@ -203,8 +203,8 @@ else:
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )
-    # graph = lv.objviz(root)
-    # graph.view()
+    graph = lv.objviz(root)
+    graph.view()
 
 def display_sol(page: Page):
     idx = 0

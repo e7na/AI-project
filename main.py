@@ -1,9 +1,7 @@
-from __future__ import absolute_import
 import time
 import numpy as np
-
 from data_structure import *
-from state_ops import *
+from util import *
 from yamete import *
 
 # initializing the puzzle properties
@@ -137,49 +135,45 @@ def display_sol(frames, initial=0):
     idx = initial
     size = 500, 500
 
-    pygame.init()
-    pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
-
+    gl.glClearColor(1, 1, 1, 1)
     imgui.create_context()
-    impl = PygameRenderer()
+    window = impl_glfw_init("Sliding puzzle", size)
+    impl = GlfwRenderer(window)
 
-    io = imgui.get_io()
-    io.display_size = size
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
-            impl.process_event(event)
-        imgui.new_frame()
-
-        frame = frames[idx]
-
-        with imgui.begin(
-            "Board",
-            flags=imgui.WINDOW_NO_TITLE_BAR,
-        ):
-            imgui.columns(width)
-            for row in frame:
-                imgui.separator()
-                for block in row:
-                    imgui.text(str(block) if block != PLACEHOLDER else SLOT)
-                    imgui.next_column()
-            imgui.columns(1)
-            imgui.separator()
-            imgui.spacing() ; imgui.spacing() 
-            match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
-                case [index, _, _, True] if index < len(frames) - 1:
-                    idx += 1
-                case [index, True, _, _] if index > 0:
-                    idx -= 1
-
-        gl.glClearColor(1, 1, 1, 1)
+    while not glfw.window_should_close(window):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+        glfw.poll_events()
+        impl.process_inputs()
+        # io = imgui.get_io()
+        frame = frames[idx]
+        imgui.new_frame()
+        _, keep_window_open = imgui.begin(
+            "Board",
+            closable=True,
+        )
+        imgui.columns(width)
+        for row in frame:
+            imgui.separator()
+            for block in row:
+                imgui.text(str(block) if block != PLACEHOLDER else SLOT)
+                imgui.next_column()
+        imgui.columns(1)
+        imgui.separator()
+
+        imgui.spacing() ; imgui.spacing()
+        match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
+            case [index, _, _, True] if index < len(frames) - 1:
+                idx += 1
+            case [index, True, _, _] if index > 0:
+                idx -= 1
+        imgui.end()
         imgui.render()
         impl.render(imgui.get_draw_data())
-        pygame.display.flip()
+        glfw.swap_buffers(window)
+        if not keep_window_open:
+            glfw.set_window_should_close(window, True)
+    impl.shutdown()
+    glfw.terminate()
 
 
 """Initialise search parameters"""
@@ -192,7 +186,7 @@ explored = []
 solution = []
 path = []
 start = time.time()
-iteration_limit = 2000
+iteration_limit = 5000
 
 print()
 """main search loop"""

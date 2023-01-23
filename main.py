@@ -235,12 +235,12 @@ def display_sol(page: Page):
 
     def nextA(e):
         nonlocal idx
-        idx = idx + 1
+        if idx < len(frames) - 1: idx += 1
         repopulate()
 
     def PrevA(e):
         nonlocal idx
-        idx = idx - 1
+        if idx >0: idx -= 1
         repopulate()
     
     page.add(

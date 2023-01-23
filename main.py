@@ -213,13 +213,11 @@ def display_sol(page: Page):
     completed = ft.Ref[ft.Text]()
     value = lambda s: s if s!=-1 else " "
 
-    blocks = [
-        [
+    blocks = [[
             TextField(value=value(block),
             text_align="center", width=100, disabled=True)
             for block in row
-        ] for row in frames[idx]
-    ]
+        ] for row in frames[idx]]
 
 
     def repopulate():
@@ -258,7 +256,7 @@ def display_sol(page: Page):
     page.add(Row([    
                 ElevatedButton("Previous", on_click=PrevA),
                 ElevatedButton("Next", on_click=nextA)
-            ],alignment="center"))  # javascript mode
+            ],alignment="center"))
 
     page.add(Row([ft.Text(ref=completed, color="green400")], alignment="center"))
     completed.current.value = f"step {idx+1} of {len(frames)}"

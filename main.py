@@ -238,7 +238,7 @@ def display_sol(page: Page):
             idx -= 1
             repopulate()
 
-    page.add(*[Row([txt for txt in row]) for row in blocks])
+    page.add(*[Row([txt for txt in row],alignment="center") for row in blocks])
 
     page.add(
         Row(

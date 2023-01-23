@@ -204,51 +204,65 @@ else:
         f"\nsolution: {solution}"
     )
     graph = lv.objviz(root)
-    # graph.view()
-
+    #graph.view()
 
 def display_sol(page: Page):
     idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
-    # for (x,y), value in np.ndenumerate(frames):
+    completed = ft.Ref[ft.Text]()
+    value = lambda s: s if s!=-1 else " "
+
     blocks = [
         [
-            TextField(value=value, text_align="center", width=100, disabled=True)
-            for value in row
-        ]
-        for row in frames[idx]
+            TextField(value=value(block),
+            text_align="center", width=100, disabled=True)
+            for block in row
+        ] for row in frames[idx]
     ]
 
+
     def repopulate():
+        update_count()
         nonlocal blocks
-        for (x, y), value in np.ndenumerate(frames[idx]):
-            blocks[x][y].value = str(value)
+        for (x,y), block in np.ndenumerate(frames[idx]):
+            blocks[x][y].value = str(value(block))
         page.update()
 
+    def update_count():
+        completed.current.value = f"step {idx+1} of {len(frames)}"
+        page.update()
+    # update_count()
+    
     def nextA(e):
+        update_count()
         nonlocal idx
         if idx < len(frames) - 1:
             idx += 1
             repopulate()
+        if idx == len(frames) - 1:
+            completed.current.value = "the goal!"
+            page.update()
 
     def PrevA(e):
         nonlocal idx
-        if idx > 0:
+        if idx >0:
             idx -= 1
             repopulate()
-
-    page.add(*[Row([txt for txt in row],alignment="center") for row in blocks])
-
-    page.add(
-        Row(
-            [
+    
+    page.add(*[Row([
+                txt for txt in row
+            ], alignment="center")
+            for row in blocks])
+            
+    page.add(Row([    
                 ElevatedButton("Previous", on_click=PrevA),
-                ElevatedButton("Next", on_click=nextA),
-            ],
-            alignment="center",
-        )
-    )  # javascript mode
+                ElevatedButton("Next", on_click=nextA)
+            ],alignment="center"))  # javascript mode
+
+    page.add(Row([ft.Text(ref=completed, color="green400")], alignment="center"))
+    completed.current.value = f"step {idx+1} of {len(frames)}"
+    page.update()
 
 
 app(target=display_sol, port=8550)

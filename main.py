@@ -210,27 +210,16 @@ def display_sol(page: Page):
     idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
-    
-    txt_number0 = TextField(value=frames[idx][0][0], text_align="center", width=100, disabled=True)
-    txt_number1 = TextField(value=frames[idx][0][1], text_align="center", width=100, disabled=True)
-    txt_number2 = TextField(value=frames[idx][0][2], text_align="center", width=100, disabled=True)
-    txt_number3 = TextField(value=frames[idx][1][0], text_align="center", width=100, disabled=True)
-    txt_number4 = TextField(value=frames[idx][1][1], text_align="center", width=100, disabled=True)
-    txt_number5 = TextField(value=frames[idx][1][2], text_align="center", width=100, disabled=True)
-    txt_number6 = TextField(value=frames[idx][2][0], text_align="center", width=100, disabled=True)
-    txt_number7 = TextField(value=frames[idx][2][1], text_align="center", width=100, disabled=True)
-    txt_number8 = TextField(value=frames[idx][2][2], text_align="center", width=100, disabled=True)
+    # for (x,y), value in np.ndenumerate(frames):
+    blocks = [
+        TextField(value=value,text_align="center", width=100, disabled=True)
+        for _,value in np.ndenumerate(frames[idx])
+    ] 
 
     def repopulate():
-        txt_number0.value = str(frames[idx][0][0])
-        txt_number1.value = str(frames[idx][0][1])
-        txt_number2.value = str(frames[idx][0][2])
-        txt_number3.value = str(frames[idx][1][0])
-        txt_number4.value = str(frames[idx][1][1])
-        txt_number5.value = str(frames[idx][1][2])
-        txt_number6.value = str(frames[idx][2][0])
-        txt_number7.value = str(frames[idx][2][1])
-        txt_number8.value = str(frames[idx][2][2])
+        nonlocal blocks
+        for (x,y), value in np.ndenumerate(frames[idx]):
+            blocks[x*width + y].value = str(value)
         page.update()
 
     def nextA(e):
@@ -245,29 +234,30 @@ def display_sol(page: Page):
             idx -= 1
             repopulate()
     
+    txt = iter(blocks)
     page.add(
         Column([
         Row(
             [
-                txt_number0,
-                txt_number1,
-                txt_number2,
+                next(txt),
+                next(txt),
+                next(txt),
             ],
             alignment="center",
         ),
         Row(
             [
-                txt_number3,
-                txt_number4,
-                txt_number5,
+                next(txt),
+                next(txt),
+                next(txt),
             ],
             alignment="center",
         ),
         Row(
             [
-                txt_number6,
-                txt_number7,
-                txt_number8,
+                next(txt),
+                next(txt),
+                next(txt),
             ],
             alignment="center",
         ),

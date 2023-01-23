@@ -204,41 +204,22 @@ else:
         f"\nsolution: {solution}"
     )
     graph = lv.objviz(root)
-    # graph.view()
-
+    #graph.view()
 
 def display_sol(page: Page):
     idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
-
-    txt_number0 = TextField(
-        value=frames[idx][0][0], text_align="center", width=100, disabled=True
-    )
-    txt_number1 = TextField(
-        value=frames[idx][0][1], text_align="center", width=100, disabled=True
-    )
-    txt_number2 = TextField(
-        value=frames[idx][0][2], text_align="center", width=100, disabled=True
-    )
-    txt_number3 = TextField(
-        value=frames[idx][1][0], text_align="center", width=100, disabled=True
-    )
-    txt_number4 = TextField(
-        value=frames[idx][1][1], text_align="center", width=100, disabled=True
-    )
-    txt_number5 = TextField(
-        value=frames[idx][1][2], text_align="center", width=100, disabled=True
-    )
-    txt_number6 = TextField(
-        value=frames[idx][2][0], text_align="center", width=100, disabled=True
-    )
-    txt_number7 = TextField(
-        value=frames[idx][2][1], text_align="center", width=100, disabled=True
-    )
-    txt_number8 = TextField(
-        value=frames[idx][2][2], text_align="center", width=100, disabled=True
-    )
+    
+    txt_number0 = TextField(value=frames[idx][0][0], text_align="center", width=100, disabled=True)
+    txt_number1 = TextField(value=frames[idx][0][1], text_align="center", width=100, disabled=True)
+    txt_number2 = TextField(value=frames[idx][0][2], text_align="center", width=100, disabled=True)
+    txt_number3 = TextField(value=frames[idx][1][0], text_align="center", width=100, disabled=True)
+    txt_number4 = TextField(value=frames[idx][1][1], text_align="center", width=100, disabled=True)
+    txt_number5 = TextField(value=frames[idx][1][2], text_align="center", width=100, disabled=True)
+    txt_number6 = TextField(value=frames[idx][2][0], text_align="center", width=100, disabled=True)
+    txt_number7 = TextField(value=frames[idx][2][1], text_align="center", width=100, disabled=True)
+    txt_number8 = TextField(value=frames[idx][2][2], text_align="center", width=100, disabled=True)
 
     def repopulate():
         txt_number0.value = str(frames[idx][0][0])
@@ -260,47 +241,42 @@ def display_sol(page: Page):
 
     def PrevA(e):
         nonlocal idx
-        if idx > 0:
+        if idx >0:
             idx -= 1
             repopulate()
-
+    
     page.add(
-        Column(
+        Column([
+        Row(
             [
-                Row(
-                    [
-                        txt_number0,
-                        txt_number1,
-                        txt_number2,
-                    ],
-                    alignment="center",
-                ),
-                Row(
-                    [
-                        txt_number3,
-                        txt_number4,
-                        txt_number5,
-                    ],
-                    alignment="center",
-                ),
-                Row(
-                    [
-                        txt_number6,
-                        txt_number7,
-                        txt_number8,
-                    ],
-                    alignment="center",
-                ),
-                Row(
-                    [
-                        ElevatedButton("Previous", on_click=PrevA),
-                        ElevatedButton("Next", on_click=nextA),
-                    ],
-                    alignment="center",
-                ),
-            ]
+                txt_number0,
+                txt_number1,
+                txt_number2,
+            ],
+            alignment="center",
+        ),
+        Row(
+            [
+                txt_number3,
+                txt_number4,
+                txt_number5,
+            ],
+            alignment="center",
+        ),
+        Row(
+            [
+                txt_number6,
+                txt_number7,
+                txt_number8,
+            ],
+            alignment="center",
+        ),
+        Row([
+            ElevatedButton("Previous", on_click=PrevA),
+        ElevatedButton("Next", on_click=nextA)
+        ],alignment="center"
         )
-    )
-
+        ]
+    ))
 
 app(target=display_sol, port=8550)

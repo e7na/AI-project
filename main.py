@@ -219,15 +219,15 @@ def display_sol(page: Page):
         index -= 1
         page.update()
 
-    txt_number0 = TextField(value=frames[index][0][0], text_align="center", width=100, disabled=True)
-    txt_number1 = TextField(value=frames[index][0][1], text_align="center", width=100, disabled=True)
-    txt_number2 = TextField(value=frames[index][0][2], text_align="center", width=100, disabled=True)
-    txt_number3 = TextField(value=frames[index][1][0], text_align="center", width=100, disabled=True)
-    txt_number4 = TextField(value=frames[index][1][1], text_align="center", width=100, disabled=True)
-    txt_number5 = TextField(value=frames[index][1][2], text_align="center", width=100, disabled=True)
-    txt_number6 = TextField(value=frames[index][2][0], text_align="center", width=100, disabled=True)
-    txt_number7 = TextField(value=frames[index][2][1], text_align="center", width=100, disabled=True)
-    txt_number8 = TextField(value=frames[index][2][2], text_align="center", width=100, disabled=True)
+    txt_number0 = TextField(value=str(frames[index][0][0]), text_align="center", width=100, disabled=True)
+    txt_number1 = TextField(value=str(frames[index][0][1]), text_align="center", width=100, disabled=True)
+    txt_number2 = TextField(value=str(frames[index][0][2]), text_align="center", width=100, disabled=True)
+    txt_number3 = TextField(value=str(frames[index][1][0]), text_align="center", width=100, disabled=True)
+    txt_number4 = TextField(value=str(frames[index][1][1]), text_align="center", width=100, disabled=True)
+    txt_number5 = TextField(value=str(frames[index][1][2]), text_align="center", width=100, disabled=True)
+    txt_number6 = TextField(value=str(frames[index][2][0]), text_align="center", width=100, disabled=True)
+    txt_number7 = TextField(value=str(frames[index][2][1]), text_align="center", width=100, disabled=True)
+    txt_number8 = TextField(value=str(frames[index][2][2]), text_align="center", width=100, disabled=True)
 
     page.add(
         Column([Row(
@@ -271,4 +271,4 @@ def display_sol(page: Page):
         ]
     """
 
-flet.app(target=display_sol, port=8550)
+app(target=display_sol, port=8550)

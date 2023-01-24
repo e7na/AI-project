@@ -3,23 +3,24 @@ from main import *
 
 def gui(page: Page):
     index = 0
-    page.title = "Flet Sliding Puzzle"
+    page.title = "Sliding Puzzle"
     page.vertical_alignment = "center"
 
     value = lambda s: s if s!=PLACEHOLDER else SLOT
     block_width_or = lambda x: x if not (pw:=page.window_width) else 0.9*pw / width
     FALLBACK_WIDTH = 100
-
-    steps_summary = Ref[Text]()
-    steps_string = lambda: f"step {index+1} of {len(frames)}"
+    blocks = [[ # the TextField matrix to display the puzzle
+            TextField(
+                value=value(block), text_align="center", 
+                width=block_width_or(FALLBACK_WIDTH), disabled=True
+            )
+            for block in row
+        ] for row in frames[index]]
 
     page.on_resize = lambda e: blocks_map(update_width)
 
-    blocks = [[ # the TextField matrix to display the puzzle
-            TextField(value=value(block),
-            text_align="center", width=block_width_or(FALLBACK_WIDTH), disabled=True)
-            for block in row
-        ] for row in frames[index]]
+    steps_summary = Ref[Text]()
+    steps_string = lambda: f"step {index+1} of {len(frames)}"
 
     def blocks_map(fn):
         nonlocal blocks

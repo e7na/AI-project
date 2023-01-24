@@ -152,7 +152,7 @@ while not frontier.is_empty() and len(explored) <= iteration_limit:
         end="",
     )
     # remove a node from the frontier
-    current = frontier.remove()
+    if not (current := frontier.remove()): break
     # add its state to the explored
     explored.append(current.state)
 

@@ -210,49 +210,65 @@ def display_sol(page: Page):
     idx = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
-    value = lambda s: s if s!=PLACEHOLDER else SLOT
-    completed = ft.Ref[ft.Text]()
 
-    blocks = [[
+    value = lambda s: s if s!=PLACEHOLDER else SLOT
+    block_width_or = lambda x: x if not (pw:=page.window_width) else 0.9*pw / width
+    FALLBACK_WIDTH = 100
+
+    steps_summary = ft.Ref[ft.Text]()
+    steps_string = lambda: f"step {idx+1} of {len(frames)}"
+
+    page.on_resize = lambda e: blocks_map(update_width)
+
+    blocks = [[ # the TextField matrix to display the puzzle
             TextField(value=value(block),
-            text_align="center", width=100, disabled=True)
+            text_align="center", width=block_width_or(FALLBACK_WIDTH), disabled=True)
             for block in row
         ] for row in frames[idx]]
-
-    def repopulate():
-        completed.current.value = f"step {idx+1} of {len(frames)}"
+    
+    def blocks_map(fn):
         nonlocal blocks
-        for (x,y), block in np.ndenumerate(frames[idx]):
-            blocks[x][y].value = str(value(block))
+        for (x, y), block in np.ndenumerate(frames[idx]):
+            fn(x, y, block, blocks)
         page.update()
+
+    def update_width(x, y, b, m): 
+        m[x][y].width = block_width_or(FALLBACK_WIDTH)
+    
+    def update_value(x, y, b, m):
+        m[x][y].value = str(value(b))
+
+    def update_frame():
+        steps_summary.current.value = steps_string()
+        blocks_map(update_value)
     
     def nextA(e):
         nonlocal idx
         if idx < len(frames) - 1:
             idx += 1
-            repopulate()
+            update_frame()
         if idx == len(frames) - 1:
-            completed.current.value = "the goal!"
+            steps_summary.current.value = "the goal!"
             page.update()
 
     def PrevA(e):
         nonlocal idx
         if idx > 0:
             idx -= 1
-            repopulate()
+            update_frame()
     
     page.add(*[Row([
                 txt for txt in row
             ], alignment="center")
             for row in blocks])
             
-    page.add(Row([    
+    page.add(Row([
                 ElevatedButton("Previous", on_click=PrevA),
                 ElevatedButton("Next", on_click=nextA)
-            ],alignment="center"))
+            ], alignment="center"))
 
-    page.add(Row([ft.Text(ref=completed, color="green400")], alignment="center"))
-    completed.current.value = f"step {idx+1} of {len(frames)}"
+    page.add(Row([ft.Text(ref=steps_summary, color="green400")], alignment="center"))
+    steps_summary.current.value = steps_string()
     page.update()
 
 

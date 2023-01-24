@@ -54,7 +54,7 @@ def gui(page: Page):
             update_board()
     
     def auto_solve(e):
-        for _ in frames:
+        for _ in frames[index::]:
             next_frame(e)
             time.sleep(0.5)
             

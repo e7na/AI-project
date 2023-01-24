@@ -51,6 +51,13 @@ def gui(page: Page):
         if index > 0:
             index -= 1
             update_board()
+    
+    def auto_solve(e):
+        x = 0
+        while x < (len(frames) - 1):
+            next_frame(x)
+            time.sleep(0.5)
+            x += 1
 
     page.add(*[Row([
                 txt for txt in row
@@ -59,7 +66,8 @@ def gui(page: Page):
 
     page.add(Row([
                 ElevatedButton("Previous", on_click=prev_frame),
-                ElevatedButton("Next", on_click=next_frame)
+                ElevatedButton("Next", on_click=next_frame),
+                ElevatedButton("Auto Solve", on_click=auto_solve)
             ], alignment="center"))
 
     page.add(Row([Text(ref=steps_summary, color="green400")], alignment="center"))

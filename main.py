@@ -23,7 +23,7 @@ with open(input) as p:
         ],
         dtype=np.int8,
     )
-    height, width = puzzle.shape
+    HEIGHT, WIDTH = puzzle.shape
 
 
 # check if the current state is the goal state
@@ -56,8 +56,8 @@ def distance(state):
     for (current_y, current_x), block in np.ndenumerate(state):
         if block != PLACEHOLDER:
             value = int(block) - 1
-            goal_x = value % width
-            goal_y = value // width
+            goal_x = value % WIDTH
+            goal_y = value // WIDTH
 
             x_distance = abs(
                 goal_x - current_x
@@ -92,13 +92,13 @@ def children(state):
         if slot_x > 0:  # if the slot is on the 2nd or 3rd column
             # this means that a block can be moved to the right
             possible_moves.append(["right", slot_coords])
-        if slot_x < width - 1:  # if the slot is on the 1st or 2nd column
+        if slot_x < WIDTH - 1:  # if the slot is on the 1st or 2nd column
             # this means that a block can be moved to the left
             possible_moves.append(["left", slot_coords])
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
             possible_moves.append(["down", slot_coords])
-        if slot_y < height - 1:  # if the slot is on the 1st or 2nd row
+        if slot_y < HEIGHT - 1:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
     return possible_moves

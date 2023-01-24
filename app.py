@@ -1,18 +1,19 @@
 from flet import *
-from main import *
+from main import np, time, frames, PLACEHOLDER, SLOT, WIDTH as BOARD_WIDTH
 
 def gui(page: Page):
     index = 0
     page.title = "Sliding Puzzle"
     page.vertical_alignment = "center"
-
-    value = lambda s: s if s!=PLACEHOLDER else SLOT
-    block_width_or = lambda x: x if not (pw:=page.window_width) else 0.70*pw / width
     buttons = Ref[Text]()
+
+    width_equation = lambda: page.window_width * 0.7/(BOARD_WIDTH+0.7)
+    block_width_or = lambda x, fn=width_equation: dyn if (dyn:=fn()) < x else x
+    value = lambda s: s if s!=PLACEHOLDER else SLOT
     FALLBACK_WIDTH = 100
     blocks = [[ # the TextField matrix to display the puzzle
             TextField(
-                value=value(block), text_align="center", 
+                value=value(block), text_align="center", dense=True,
                 width=block_width_or(FALLBACK_WIDTH), disabled=True
             )
             for block in row
@@ -27,7 +28,7 @@ def gui(page: Page):
         nonlocal blocks
         for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
-        buttons.current.width = page.window_width * 0.73
+        buttons.current.width = 1.1*width_equation()
         page.update()
 
     def update_width(x, y, b, m): 
@@ -60,7 +61,7 @@ def gui(page: Page):
     def auto_solve(e):
         for _ in frames[index::]:
             next_frame(e)
-            time.sleep(0.5)
+            time.sleep(0.4)
             
     page.add(*[Row([
                 txt for txt in row
@@ -68,7 +69,7 @@ def gui(page: Page):
             for row in blocks])
 
     page.add(Row([
-                Row(ref = buttons,controls=[ElevatedButton("Previous", on_click=prev_frame, expand=1),
+                Row(ref=buttons, controls=[ElevatedButton("Previous", on_click=prev_frame, expand=1),
                 ElevatedButton("Next", on_click=next_frame, expand=1),
                 ElevatedButton("Auto Solve", on_click=auto_solve, expand=1)], alignment="center", width=page.window_width * 0.73)
             ], alignment="center"))

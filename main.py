@@ -134,7 +134,6 @@ def apply_move(move, state):
             new_state = initial_state
     return new_state
 
-
 def display_sol(frames, initial=0):
     idx = initial
     size = 500, 500
@@ -151,26 +150,23 @@ def display_sol(frames, initial=0):
         # io = imgui.get_io()
         frame = frames[idx]
         imgui.new_frame()
-        _, keep_window_open = imgui.begin(
-            "Board",
-            closable=True,
-        )
-        imgui.columns(width)
-        for row in frame:
+        with imgui.begin("Board", closable=True) as (_, keep_window_open):
+            imgui.columns(width)
+            for row in frame:
+                imgui.separator()
+                for block in row:
+                    imgui.text(str(block) if block != PLACEHOLDER else SLOT)
+                    imgui.next_column()
+            imgui.columns(1)
             imgui.separator()
-            for block in row:
-                imgui.text(str(block) if block != PLACEHOLDER else SLOT)
-                imgui.next_column()
-        imgui.columns(1)
-        imgui.separator()
 
-        imgui.spacing() ; imgui.spacing()
-        match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
-            case [index, _, _, True] if index < len(frames) - 1:
-                idx += 1
-            case [index, True, _, _] if index > 0:
-                idx -= 1
-        imgui.end()
+            imgui.spacing() ; imgui.spacing()
+            match [idx, imgui.button("Back"), imgui.same_line(), imgui.button("Next")]:
+                case [index, _, _, True] if index < len(frames) - 1:
+                    idx += 1
+                case [index, True, _, _] if index > 0:
+                    idx -= 1
+
         imgui.render()
         impl.render(imgui.get_draw_data())
         glfw.swap_buffers(window)

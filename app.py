@@ -54,12 +54,10 @@ def gui(page: Page):
             update_board()
     
     def auto_solve(e):
-        x = 0
-        while x < (len(frames) - 1):
-            next_frame(x)
+        for _ in frames:
+            next_frame(e)
             time.sleep(0.5)
-            x += 1
-
+            
     page.add(*[Row([
                 txt for txt in row
             ], alignment="center")

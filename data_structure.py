@@ -1,13 +1,15 @@
 class Node:
-    def __init__(self, state, parent=None, children=None, action=None, heuristic=None, is_sol=None):
+    def __init__(self, state, parent=None, children=None, action=None, heuristic=0, is_sol=None):
         self.state = state
         self.parent = parent
         self.action = action
         self.heuristic = heuristic
+        self.cost = 0
         self.children = children
         self.is_sol = is_sol
         if self.parent is not None:
             self.parent.add_child(self)
+            self.cost = parent.cost + 1
         
         
     # def reverse(self, copy=False):
@@ -33,7 +35,7 @@ class Node:
             self.children.append(child)
 
             
-# for the DFS
+# for the BFS
 class QueueFrontier:
     def __init__(self):
         self.frontier = []
@@ -53,30 +55,27 @@ class QueueFrontier:
 
     def remove(self):  # FIFO
         if not self.is_empty():
-            # take out the queue's head; the array's first element
-            head = self.frontier[0]
-            # and slice it off the array
-            self.frontier = self.frontier[1:]
-            # then return it
-            return head
+            return self.frontier.pop(0)
 
 
-# for the GBFS or A*
+# for the GBFS
 class GBFSFrontier(QueueFrontier):
     def remove(self):  # greedy
-        # sort the frontier by path cost
+        # sort the frontier by heuristic values of each node (ascending)
         self.frontier.sort(key=lambda node: node.heuristic)
         # then take out the cheapest, first element and return it
         return super().remove()
 
+class A_star(QueueFrontier):
+    def remove(self):
+        # sort the frontier by the evaluation function of each node (ascending)
+        self.frontier.sort(key=lambda node: (node.heuristic+node.cost))
+        # then take out the cheapest, first element and return it
+        return super().remove()
 
-# for the BFS or dijkstra
+
+# for the DFS
 class StackFrontier(QueueFrontier):
     def remove(self):  # LIFO
         if not self.is_empty():
-            # pop off the top of the stack; the array's last element
-            top = self.frontier[-1]
-            # and slice it off the array
-            self.frontier = self.frontier[:-1]
-            # then return it
-            return top
+            return self.frontier.pop()

@@ -133,17 +133,22 @@ def apply_move(move, state):
     return new_state
 
 
+options = {
+    'A*': A_star(),
+    'GBFS': GBFSFrontier(),
+    'BFS': QueueFrontier(),
+    'DFS': StackFrontier(),
+}
+
 """Initialise search parameters"""
 root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-# frontier = StackFrontier()  # DFS
-# frontier = QueueFrontier()  # BFS
-frontier = GBFSFrontier()  # GBFS
+frontier = options.get('A*')
 frontier.add(root)
 explored = []
 solution = []
 path = []
 start = time.time()
-iteration_limit = 5000
+iteration_limit = 200
 
 print()
 """main search loop"""

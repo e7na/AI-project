@@ -7,7 +7,8 @@ def gui(page: Page):
     page.vertical_alignment = "center"
 
     value = lambda s: s if s!=PLACEHOLDER else SLOT
-    block_width_or = lambda x: x if not (pw:=page.window_width) else 0.9*pw / width
+    block_width_or = lambda x: x if not (pw:=page.window_width) else 0.70*pw / width
+    buttons = Ref[Text]()
     FALLBACK_WIDTH = 100
     blocks = [[ # the TextField matrix to display the puzzle
             TextField(
@@ -20,12 +21,13 @@ def gui(page: Page):
     page.on_resize = lambda e: blocks_map(update_width)
 
     steps_summary = Ref[Text]()
-    steps_string = lambda: f"step {index+1} of {len(frames)}"
+    steps_string = lambda: f"Step {index+1} of {len(frames)}"
 
     def blocks_map(fn):
         nonlocal blocks
         for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
+        buttons.current.width = page.window_width * 0.73
         page.update()
 
     def update_width(x, y, b, m): 
@@ -44,13 +46,15 @@ def gui(page: Page):
             index += 1
             update_board()
         if index == len(frames) - 1:
-            steps_summary.current.value = "the goal!"
+            steps_summary.current.color="green400"
+            steps_summary.current.value = "Goal Reached!"
             page.update()
 
     def prev_frame(e):
         nonlocal index
         if index > 0:
             index -= 1
+            steps_summary.current.color="white"
             update_board()
     
     def auto_solve(e):
@@ -64,12 +68,12 @@ def gui(page: Page):
             for row in blocks])
 
     page.add(Row([
-                ElevatedButton("Previous", on_click=prev_frame),
-                ElevatedButton("Next", on_click=next_frame),
-                ElevatedButton("Auto Solve", on_click=auto_solve)
+                Row(ref = buttons,controls=[ElevatedButton("Previous", on_click=prev_frame, expand=1),
+                ElevatedButton("Next", on_click=next_frame, expand=1),
+                ElevatedButton("Auto Solve", on_click=auto_solve, expand=1)], alignment="center", width=page.window_width * 0.73)
             ], alignment="center"))
 
-    page.add(Row([Text(ref=steps_summary, color="green400")], alignment="center"))
+    page.add(Row([Text(ref=steps_summary, color="white")], alignment="center"))
     steps_summary.current.value = steps_string()
     page.update()
 

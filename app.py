@@ -30,7 +30,7 @@ def gui(page: Page):
             fn(x, y, block, blocks)
         page.update()
 
-    button_width = lambda: (BOARD_WIDTH+.73)*block_width_or(FALLBACK_WIDTH)
+    button_width = lambda: (BOARD_WIDTH)*block_width_or(FALLBACK_WIDTH)
     def update_width(x, y, b, m): 
         m[x][y].width = block_width_or(FALLBACK_WIDTH)
         buttons.current.width = button_width()

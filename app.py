@@ -10,7 +10,7 @@ def gui(page: Page):
     width_equation = lambda: page.window_width * 0.7/(BOARD_WIDTH+0.7)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn:=fn()) < x else x
     value = lambda s: s if s!=PLACEHOLDER else SLOT
-    FALLBACK_WIDTH = 100
+    FALLBACK_WIDTH = 150
     blocks = [[ # the TextField matrix to display the puzzle
             TextField(
                 value=value(block), text_align="center", dense=True,
@@ -28,11 +28,12 @@ def gui(page: Page):
         nonlocal blocks
         for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
-        buttons.current.width = 1.1*width_equation()
         page.update()
 
+    button_width = lambda: (BOARD_WIDTH+.73)*block_width_or(FALLBACK_WIDTH)
     def update_width(x, y, b, m): 
         m[x][y].width = block_width_or(FALLBACK_WIDTH)
+        buttons.current.width = button_width()
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
@@ -68,11 +69,13 @@ def gui(page: Page):
             ], alignment="center")
             for row in blocks])
 
-    page.add(Row([
-                Row(ref=buttons, controls=[ElevatedButton("Previous", on_click=prev_frame, expand=1),
-                ElevatedButton("Next", on_click=next_frame, expand=1),
-                ElevatedButton("Auto Solve", on_click=auto_solve, expand=1)], alignment="center", width=page.window_width * 0.73)
-            ], alignment="center"))
+    page.add(Row([Row(ref=buttons, controls=[
+            ElevatedButton("Previous", on_click=prev_frame, expand=1),
+            ElevatedButton("Next", on_click=next_frame, expand=1),
+            ElevatedButton("Auto Solve", on_click=auto_solve, expand=1)
+        ], alignment="center",
+        width=button_width())],
+        alignment="center"))
 
     page.add(Row([Text(ref=steps_summary, color="white")], alignment="center"))
     steps_summary.current.value = steps_string()

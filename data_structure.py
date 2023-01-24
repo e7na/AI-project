@@ -8,7 +8,7 @@ class Node:
         self.is_sol = is_sol
         if self.parent is not None:
             self.parent.add_child(self)
-        
+
         
     # def reverse(self, copy=False):
     #     _next = None

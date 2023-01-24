@@ -1,5 +1,3 @@
-
-
 def swap_right(state, slot_coords):
     slot_x, slot_y = slot_coords
     # swap the slot with the block on its left in the row

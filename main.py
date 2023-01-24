@@ -207,7 +207,7 @@ else:
     graph.view()
 
 def display_sol(page: Page):
-    idx = 0
+    index = 0
     page.title = "Flet Sliding Puzzle"
     page.vertical_alignment = "center"
 
@@ -216,7 +216,7 @@ def display_sol(page: Page):
     FALLBACK_WIDTH = 100
 
     steps_summary = ft.Ref[ft.Text]()
-    steps_string = lambda: f"step {idx+1} of {len(frames)}"
+    steps_string = lambda: f"step {index+1} of {len(frames)}"
 
     page.on_resize = lambda e: blocks_map(update_width)
 
@@ -224,47 +224,47 @@ def display_sol(page: Page):
             TextField(value=value(block),
             text_align="center", width=block_width_or(FALLBACK_WIDTH), disabled=True)
             for block in row
-        ] for row in frames[idx]]
-    
+        ] for row in frames[index]]
+
     def blocks_map(fn):
         nonlocal blocks
-        for (x, y), block in np.ndenumerate(frames[idx]):
+        for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
         page.update()
 
     def update_width(x, y, b, m): 
         m[x][y].width = block_width_or(FALLBACK_WIDTH)
-    
+
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
 
-    def update_frame():
+    def update_board():
         steps_summary.current.value = steps_string()
         blocks_map(update_value)
-    
-    def nextA(e):
-        nonlocal idx
-        if idx < len(frames) - 1:
-            idx += 1
-            update_frame()
-        if idx == len(frames) - 1:
+
+    def next_frame(e):
+        nonlocal index
+        if index < len(frames) - 1:
+            index += 1
+            update_board()
+        if index == len(frames) - 1:
             steps_summary.current.value = "the goal!"
             page.update()
 
-    def PrevA(e):
-        nonlocal idx
-        if idx > 0:
-            idx -= 1
-            update_frame()
-    
+    def prev_frame(e):
+        nonlocal index
+        if index > 0:
+            index -= 1
+            update_board()
+
     page.add(*[Row([
                 txt for txt in row
             ], alignment="center")
             for row in blocks])
-            
+
     page.add(Row([
-                ElevatedButton("Previous", on_click=PrevA),
-                ElevatedButton("Next", on_click=nextA)
+                ElevatedButton("Previous", on_click=prev_frame),
+                ElevatedButton("Next", on_click=next_frame)
             ], alignment="center"))
 
     page.add(Row([ft.Text(ref=steps_summary, color="green400")], alignment="center"))

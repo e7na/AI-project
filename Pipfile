@@ -12,4 +12,4 @@ imgui = {extras = ["glfw"], ref = "dev/version-2.0", git = "https://github.com/p
 [dev-packages]
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"

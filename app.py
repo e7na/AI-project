@@ -1,6 +1,9 @@
 from flet import *
-from main import np, time, frames, PLACEHOLDER, SLOT, HEIGHT as BOARD_HIGHT , WIDTH as BOARD_WIDTH
+from main import np, time, PLACEHOLDER, SLOT, parse_puzzle, read_file, search
 
+puzzle = parse_puzzle(read_file("puzzle.txt"))
+_, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
+frames = search(*puzzle)[-1]
 
 def gui(page: Page):
     page.title = "Sliding Puzzle"
@@ -9,7 +12,7 @@ def gui(page: Page):
     # Define a Starting Window Size
     page.window_width = 550
     #This is Not Right:
-    page.window_height = (BOARD_HIGHT * 90) + 120
+    page.window_height = (BOARD_HEIGHT * 90) + 120
     page.window_min_width = 550
     #page.window_min_height = 650
     page.theme_mode = "dark"

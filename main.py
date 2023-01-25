@@ -205,17 +205,18 @@ def search(puzzle, dimensions):
     else:
         return None
 
-solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))
-print("\n")
-if len(explored) >= iteration_limit:
-    print("attempt timed out")
-elif not solution:
-    print("no solution")
-else:
-    print(
-        f"search time: {round(time.time() - START_TIME,5)} seconds"
-        f"\n# of solution steps = {len(solution)}"
-        f"\nsolution: {solution}"
-    )
-    graph = lv.objviz(root)
-    graph.view()
+if __name__ == "__main__":
+    solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))
+    print("\n")
+    if len(explored) >= iteration_limit:
+        print("attempt timed out")
+    elif not solution:
+        print("no solution")
+    else:
+        print(
+            f"search time: {round(time.time() - START_TIME,5)} seconds"
+            f"\n# of solution steps = {len(solution)}"
+            f"\nsolution: {solution}"
+        )
+        graph = lv.objviz(root)
+        graph.view()

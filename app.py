@@ -1,26 +1,28 @@
 from flet import *
 from main import np, time, frames, PLACEHOLDER, SLOT, WIDTH as BOARD_WIDTH
 
+
 def gui(page: Page):
-    
     page.title = "Sliding Puzzle"
     page.vertical_alignment = "center"
     page.on_resize = lambda e: blocks_map(update_width)
-    #Define a Starting Window Size
+    # Define a Starting Window Size
     page.window_width = 500
     page.window_height = 720
     page.window_min_width = 500
     page.window_min_height = 700
-    #page.appbar = AppBar(title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"), center_title=True, bgcolor="blue200",toolbar_height=70)
+    # page.appbar = AppBar(title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"), center_title=True, bgcolor="blue200",toolbar_height=70)
     index = 0
     buttons = Ref[Text]()
     steps_summary = Ref[Text]()
     steps_string = lambda: f"Step {index+1} of {len(frames)}"
-    width_equation = lambda: page.window_width * 0.7/(BOARD_WIDTH)
-    block_width_or = lambda x, fn=width_equation: dyn if (dyn:=fn()) < x else x
-    value = lambda s: s if s!=PLACEHOLDER else SLOT
-    empty = lambda s: True if s!=PLACEHOLDER else False
+    width_equation = lambda: page.window_width * 0.7 / (BOARD_WIDTH)
+    block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
+    value = lambda s: s if s != PLACEHOLDER else SLOT
+    empty = lambda s: True if s != PLACEHOLDER else False
     FALLBACK_WIDTH = 150
+
+    # fmt: off
     blocks = [[TextField(
                 value=value(block), text_align="center", dense=True,
                 width=block_width_or(FALLBACK_WIDTH), disabled=empty(block),
@@ -53,7 +55,7 @@ def gui(page: Page):
             index += 1
             update_board()
         if index == len(frames) - 1:
-            steps_summary.current.color="green"
+            steps_summary.current.color = "green"
             steps_summary.current.value = "Goal Reached!"
             page.update()
 
@@ -61,7 +63,7 @@ def gui(page: Page):
         nonlocal index
         if index > 0:
             index -= 1
-            steps_summary.current.color="blue200"
+            steps_summary.current.color = "blue200"
             update_board()
     
     def auto_solve(e):
@@ -89,4 +91,5 @@ def gui(page: Page):
     steps_summary.current.value = steps_string()
     page.update()
 
-if (frames): app(target=gui, port=8080)
+
+if frames: app(target=gui, port=8080)

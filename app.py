@@ -7,16 +7,16 @@ def gui(page: Page):
     page.vertical_alignment = "center"
     page.on_resize = lambda e: blocks_map(update_width)
     # Define a Starting Window Size
-    page.window_width = 500
-    page.window_height = 720
-    page.window_min_width = 500
-    page.window_min_height = 700
+    page.window_width = 550
+    page.window_height = 650
+    page.window_min_width = 550
+    page.window_min_height = 650
     # page.appbar = AppBar(title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"), center_title=True, bgcolor="blue200",toolbar_height=70)
     index = 0
     buttons = Ref[Text]()
     steps_summary = Ref[Text]()
-    steps_string = lambda: f"Step {index+1} of {len(frames)}"
-    width_equation = lambda: page.window_width * 0.7 / (BOARD_WIDTH)
+    steps_string = lambda: f"{index+1} of {len(frames)}"
+    width_equation = lambda: page.window_width * 0.65 / (BOARD_WIDTH)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
     value = lambda s: s if s != PLACEHOLDER else SLOT
     empty = lambda s: True if s != PLACEHOLDER else False
@@ -71,22 +71,58 @@ def gui(page: Page):
             next_frame(e)
             time.sleep(0.4)
             
-    page.add(*[Row([
-                txt for txt in row
-            ], alignment="center")
-        for row in blocks])
+    page.add(Row([Column([
+        *[Row([txt for txt in row], alignment="center") for row in blocks],
 
-    page.add(Container(height = 10), Row([Row(ref=buttons, controls=[
+        Container(height = 10), 
+
+        Row([Row(ref=buttons, controls=[
                 OutlinedButton("Previous", on_click=prev_frame, expand=1),
-                FilledButton("Next", on_click=next_frame, expand=1),
-                ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
-            ], alignment="center",
-            width=button_width())],
-        alignment="center"))
 
-    page.add(Container(height = 5), Row([
-            Text(ref=steps_summary, color="blue200", weight="bold")
-        ], alignment="center"))
+                FilledButton("Next", on_click=next_frame, expand=1),
+
+                ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
+            ], alignment="center", width=button_width())], alignment="center"),    
+
+    ],alignment="center",horizontal_alignment="center",),
+
+    Column([Dropdown(
+        width=110,
+        height=57,
+        value="A*",
+        border_radius=10,
+        border_width=0,
+        content_padding= 16,
+        filled = True,
+        alignment=alignment.center,
+        options=[
+            dropdown.Option("A*"),
+            dropdown.Option("GBFS"),
+            dropdown.Option("DFS"),
+            dropdown.Option("BFS"),
+        ],),
+    
+    ElevatedButton("Import", disabled=True, height=58, width=110, style=ButtonStyle(shape=
+    RoundedRectangleBorder(radius=10))),
+
+    ElevatedButton("Randomize", disabled=True, height=59, width=110, style=ButtonStyle(shape=
+    RoundedRectangleBorder(radius=10))),
+
+    Container(Column([Text("Action:", weight="bold"),
+    Text("Right")],spacing=3,alignment="center"),height=58),
+
+    Container(Column([Text("Heuristic:", weight="bold"),
+    Text("6")],spacing=3,alignment="center"),height=59),
+
+    Container(Column([Text("Step:", weight="bold"),
+    Text(ref=steps_summary, color="blue200",weight="bold"),
+    ],spacing=3,alignment="center"),height=62),
+
+    ElevatedButton("Solve", disabled=True, height=59, width=110, style=ButtonStyle(shape=
+    RoundedRectangleBorder(radius=10))),
+
+    ],spacing=7)
+    ],alignment="center",vertical_alignment="start"))
 
     steps_summary.current.value = steps_string()
     page.update()

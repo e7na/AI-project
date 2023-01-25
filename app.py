@@ -14,9 +14,9 @@ def gui(page: Page):
     #page.window_min_height = 650
     page.theme_mode = "dark"
     index = 0
-    buttons = Ref[Text]()
+    frame_switcher = Ref[Text]()
     steps_summary = Ref[Text]()
-    tools_column = Ref[Column]()
+    tooltips = Ref[Column]()
     steps_string = lambda: f"{index+1} of {len(frames)}"
     width_equation = lambda: page.window_width * 0.65 / (BOARD_WIDTH)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
@@ -36,13 +36,13 @@ def gui(page: Page):
         nonlocal blocks
         for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
-        tools_column.current.height = page.window_height
+        tooltips.current.height = page.window_height - 80
         page.update()
 
-    button_width = lambda: (BOARD_WIDTH+0.3)*block_width_or(FALLBACK_WIDTH)
+    frame_switcher_width = lambda: (BOARD_WIDTH+0.3)*block_width_or(FALLBACK_WIDTH)
     def update_width(x, y, b, m): 
         m[x][y].width = block_width_or(FALLBACK_WIDTH)
-        buttons.current.width = button_width()
+        frame_switcher.current.width = frame_switcher_width()
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
@@ -73,7 +73,6 @@ def gui(page: Page):
         for _ in frames[index::]:
             next_frame(e)
             time.sleep(0.4)
-
     def change_theme(e):
         # Switch Between dark and light mode
         page.theme_mode = "light" if page.theme_mode == "dark" else "dark"
@@ -81,65 +80,71 @@ def gui(page: Page):
         page.update()
 
     # button to change theme_mode (from dark to light mode, or the reverse)
-    theme_icon_button = IconButton(icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.BLACK,
-        icon_size=30, tooltip="change theme",
-        on_click=change_theme,
-        style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}, ), )
+    theme_icon_button = IconButton(
+        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.BLACK,
+        icon_size=30, tooltip="change theme", on_click=change_theme,
+        style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
 
     page.appbar = AppBar(title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"), center_title=True, bgcolor="blue200",toolbar_height=70,
     actions=[theme_icon_button],)
             
-    page.add(Row([Column([
-        *[Row([txt for txt in row], alignment="center") for row in blocks],
+    page.add(Row([
+        Column([
+            # the TextField matrix that displays the board
+            *[Row([txt for txt in row],alignment="center")for row in blocks],
 
-        Container(height = 10), 
+            Container(height=10),
 
-        Row([Row(ref=buttons, controls=[
-                OutlinedButton("Previous", on_click=prev_frame, expand=1),
+            Row([Row(ref=frame_switcher, controls=[
+                    OutlinedButton("Previous", on_click=prev_frame, expand=1),
+            
+                    FilledButton("Next", on_click=next_frame, expand=1),
+            
+                    ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
+                ], alignment="center", width=frame_switcher_width())], alignment="center"),       
 
-                FilledButton("Next", on_click=next_frame, expand=1),
+        ], alignment="center", horizontal_alignment="center"),
 
-                ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
-            ], alignment="center", width=button_width())], alignment="center"),    
+        Column([
+            Dropdown(
+                width=110,
+                height=57, border_radius=10, border_width=0, content_padding=16,
+                value="A*", filled = True, alignment=alignment.center,
+                options=[
+                    dropdown.Option("A*"),
+                    dropdown.Option("GBFS"),
+                    dropdown.Option("DFS"),
+                    dropdown.Option("BFS"),
+                ]),
+            
+            ElevatedButton("Import", disabled=True, height=58, width=110,
+                style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
 
-    ],alignment="center",horizontal_alignment="center",),
+            ElevatedButton("Randomize", disabled=True, height=59, width=110,
+                style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
 
-    Column([Dropdown(
-        width=110,
-        height=57,
-        value="A*",
-        border_radius=10,
-        border_width=0,
-        content_padding= 16,
-        filled = True,
-        alignment=alignment.center,
-        options=[
-            dropdown.Option("A*"),
-            dropdown.Option("GBFS"),
-            dropdown.Option("DFS"),
-            dropdown.Option("BFS"),
-        ],),
-    
-    ElevatedButton("Import", disabled=True, height=58, width=110, style=ButtonStyle(shape=
-    RoundedRectangleBorder(radius=10))),
+            Container(Column([
+                        Text("Action:", weight="bold"),
+                        Text("Right")
+                    ], spacing=3, alignment="center"),
+                height=58),
 
-    ElevatedButton("Randomize", disabled=True, height=58, width=110, style=ButtonStyle(shape=
-    RoundedRectangleBorder(radius=10))),
+            Container(Column([
+                        Text("Heuristic:", weight="bold"),
+                        Text("6")
+                    ], spacing=3, alignment="center"),
+                height=59),
 
-    Container(Column([Text("Action:", weight="bold"),
-    Text("Right")], spacing=3, alignment="center"), height=58),
+            Container(Column([
+                        Text("Step:", weight="bold"),
+                        Text(ref=steps_summary, color="blue200",weight="bold"),
+                    ], spacing=3, alignment="center"),
+                height=62),
 
-    Container(Column([Text("Heuristic:", weight="bold"),
-    Text("6")], spacing=3,alignment="center"), height=58),
+            ElevatedButton("Solve", disabled=True, height=59, width=110,
+                style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+        ], ref=tooltips, height=page.window_height, wrap=True, spacing=8)
 
-    Container(Column([Text("Step:", weight="bold"),
-    Text(ref=steps_summary, color="blue200", weight="bold"),
-    ],spacing=3,alignment="center"), height=58),
-
-    ElevatedButton("Solve", disabled=True, height=58, width=110, style=ButtonStyle(shape=
-    RoundedRectangleBorder(radius=10))),
-
-    ],ref=tools_column, height= page.window_height, wrap=True, spacing=8)
     ],alignment="center",vertical_alignment="start"))
 
     steps_summary.current.value = steps_string()

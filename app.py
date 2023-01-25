@@ -14,7 +14,7 @@ def gui(page: Page):
     index = 0
 
     TITLE = "A* Sliding Puzzle"
-
+    TUTORIAL = "Input a puzzle like the example provided, with consistent rectangular dimensions (like 3x3 or 4x7), where the empty place (2 spaces) is where the puzzle will start."
     page.title = TITLE
     page.vertical_alignment = "center"
     page.theme_mode = "dark"
@@ -25,6 +25,7 @@ def gui(page: Page):
     page.window_height = BOARD_HEIGHT * 90
     page.on_resize = lambda e: blocks_map(update_width)
 
+    puzzle_input = Ref[TextField]()
     frame_switcher = Ref[Text]()
     tooltips = Ref[Column]()
     steps_summary = Ref[Text]()
@@ -111,12 +112,26 @@ def gui(page: Page):
         icon_size=30, tooltip="change theme", on_click=change_theme,
         style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
 
-    page.appbar = AppBar(
-        title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
-        center_title=True, bgcolor="blue200", toolbar_height=70,
-        actions=[theme_button])
-       
-    page.add(Row([
+    def inputP(e):
+        global path
+        puzzle = parse_puzzle(puzzle_input.current.value)
+        _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
+        path = search(*puzzle)[1]
+        view_pop(e)
+        update_content()
+        
+
+
+
+    def route_change(route):
+        page.views.clear()
+        page.views.append(
+            View(
+                "/",
+                [
+                    AppBar(title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
+                    center_title=True, bgcolor="blue200", toolbar_height=70,actions=[theme_button]),
+                    Row([
 
             Column([
                 # the TextField matrix that displays the board
@@ -141,7 +156,7 @@ def gui(page: Page):
                         dropdown.Option(algo) for algo in FronierOptions.keys()
                     ]),
                 
-                ElevatedButton("Import", disabled=True, height=58, width=TOOLTIPS_WIDTH,
+                ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, on_click=lambda _: page.go("/input"),
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
 
                 ElevatedButton("Randomize", disabled=True, height=59, width=TOOLTIPS_WIDTH,
@@ -175,7 +190,36 @@ def gui(page: Page):
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
             ], ref=tooltips, height=page.window_height, wrap=True, spacing=8)
 
-        ],alignment="center", vertical_alignment="start"))
+        ],alignment="center", vertical_alignment="start")
+                ],
+            )
+        )
+        if page.route == "/input":
+            page.views.append(
+                View(
+                    "/input",
+                    [
+                        AppBar(title=Text("Input", color=colors.BACKGROUND, weight="bold"), center_title=True,
+                        bgcolor="blue200",leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.BACKGROUND,)),
+                        Text(TUTORIAL, size=16, weight="w500"),
+                        Container(height=10),
+                        TextField(ref=puzzle_input,label="Puzzle", multiline=True,min_lines=3, value= str(read_file("puzzle.txt"))),
+                        Container(height=10),
+                        ElevatedButton("DONE", on_click=inputP, width=TOOLTIPS_WIDTH,
+                        height=60, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                    ],
+                )
+            )
+        page.update()
+
+    def view_pop(view):
+        page.views.pop()
+        top_view = page.views[-1]
+        page.go(top_view.route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go(page.route)
 
     update_content()
 

@@ -9,10 +9,15 @@ SLOT = "  "
 SEPARATOR = "|"
 PLACEHOLDER = -1
 
-input = "puzzle.txt"
-with open(input) as p:
-    puzzle = p.read().splitlines()
+INPUT = "puzzle.txt"
+
+def read_file(file_path):
+    with open(file_path) as p:
+        return p.read()
+
     # convert the board to an integer matrix
+def parse_puzzle(puzzle):
+    puzzle = puzzle.splitlines()
     puzzle = np.array(
         [
             [
@@ -23,7 +28,8 @@ with open(input) as p:
         ],
         dtype=np.int8,
     )
-    HEIGHT, WIDTH = puzzle.shape
+    height, width = puzzle.shape
+    return puzzle, (height, width)
 
 
 # check if the current state is the goal state
@@ -36,7 +42,7 @@ def is_goal(state):
 
 
 # the search cost function
-def distance(state):
+def distance(state, width):
     """
     the heuristic function is the sum of distances of each block from
     its goal position, the more shuffled the board is, the higher the
@@ -56,8 +62,8 @@ def distance(state):
     for (current_y, current_x), block in np.ndenumerate(state):
         if block != PLACEHOLDER:
             value = int(block) - 1
-            goal_x = value % WIDTH
-            goal_y = value // WIDTH
+            goal_x = value % width
+            goal_y = value // width
 
             x_distance = abs(
                 goal_x - current_x
@@ -85,20 +91,21 @@ def find_slot(state):
 
 
 # return a list of all possible neighbour nodes
-def children(state):
+def children(state, dimensions):
+    height, width = dimensions
     possible_moves = []
     if slot_coords := find_slot(state):  # the slot is the empty block
         slot_x, slot_y = slot_coords
         if slot_x > 0:  # if the slot is on the 2nd or 3rd column
             # this means that a block can be moved to the right
             possible_moves.append(["right", slot_coords])
-        if slot_x < WIDTH - 1:  # if the slot is on the 1st or 2nd column
+        if slot_x < width - 1:  # if the slot is on the 1st or 2nd column
             # this means that a block can be moved to the left
             possible_moves.append(["left", slot_coords])
         if slot_y > 0:  # if the slot is on the 2nd or 3rd row
             # this means that a block can be moved down
             possible_moves.append(["down", slot_coords])
-        if slot_y < HEIGHT - 1:  # if the slot is on the 1st or 2nd row
+        if slot_y < height - 1:  # if the slot is on the 1st or 2nd row
             # this means that a block can be moved up
             possible_moves.append(["up", slot_coords])
     return possible_moves
@@ -131,66 +138,74 @@ def apply_move(move, state):
     return new_state
 
 
-"""Initialise search parameters"""
-root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-# frontier = StackFrontier()  # DFS
-# frontier = QueueFrontier()  # BFS
-frontier = GBFSFrontier()  # GBFS
-frontier.add(root)
-explored = []
-solution = []
-path = []
-start = time.time()
-iteration_limit = 5000
+def search(puzzle, dimensions):
+    """Initialise search parameters"""
+    root = Node(state=puzzle, parent=None, action=None, is_sol=1)
+    # frontier = StackFrontier()  # DFS
+    # frontier = QueueFrontier()  # BFS
+    frontier = GBFSFrontier()  # GBFS
+    frontier.add(root)
+    explored = []
+    solution = []
+    path = []
+    global START_TIME, iteration_limit
+    START_TIME = time.time()
+    iteration_limit = 5000
+    height, width = dimensions
 
-print()
-"""main search loop"""
-while not frontier.is_empty() and len(explored) <= iteration_limit:
-    # realtime feedback to determine whether it's hung up or not
-    print(
-        f"\033[Ffrontier length: {len(frontier)}" f"\nexplored length: {len(explored)}",
-        end="",
-    )
-    # remove a node from the frontier
-    if not (current := frontier.remove()): break
-    # add its state to the explored
-    explored.append(current.state)
+    print()
+    """main search loop"""
+    while not frontier.is_empty() and len(explored) <= iteration_limit:
+        # realtime feedback to determine whether it's hung up or not
+        print(
+            f"\033[Ffrontier length: {len(frontier)}"
+            f"\nexplored length: {len(explored)}",
+            end="",
+        )
+        # remove a node from the frontier
+        if not (current := frontier.remove()):
+            break
+        # add its state to the explored
+        explored.append(current.state)
 
-    # if the current state is the goal, then generate
-    # the solution steps list and exit out to print it
-    if is_goal(current.state):
-        leaf = current
-        while current.parent is not None:
-            current.is_sol = 1
-            # prepend current.action to the solution list
-            # solution = [current.action, *solution]
+        # if the current state is the goal, then generate
+        # the solution steps list and exit out to print it
+        if is_goal(current.state):
+            leaf = current
+            while current.parent is not None:
+                current.is_sol = 1
+                # prepend current.action to the solution list
+                # solution = [current.action, *solution]
+                path = [current, *path]
+                # then move up the path one step
+                current = current.parent
             path = [current, *path]
-            # then move up the path one step
-            current = current.parent
-        path = [current, *path]
-        break
+            break
 
-    ## expanding the node
-    # for each possible move from the current state
-    for possible_move in children(current.state):
-        new_guess = apply_move(possible_move, current.state)
-        # if the state resulting from this move is neither explored nor in the frontier
-        in_explored = any((new_guess == state).all() for state in explored)
-        if not frontier.contains_state(new_guess) and not in_explored:
-            # then put it in a new node and add it to the frontier
-            child = Node(
-                state=new_guess,
-                parent=current,
-                action=possible_move[0],
-                heuristic=distance(new_guess),
-            )
-            frontier.add(child)
+        ## expanding the node
+        # for each possible move from the current state
+        for possible_move in children(current.state, dimensions):
+            new_guess = apply_move(possible_move, current.state)
+            # if the state resulting from this move is neither explored nor in the frontier
+            in_explored = any((new_guess == state).all() for state in explored)
+            if not frontier.contains_state(new_guess) and not in_explored:
+                # then put it in a new node and add it to the frontier
+                child = Node(
+                    state=new_guess,
+                    parent=current,
+                    action=possible_move[0],
+                    heuristic=distance(new_guess, width),
+                )
+                frontier.add(child)
 
-if path:
-    solution = [node.action for node in path if node.action is not None]
-    frames = [node.state for node in path]
+    if path:
+        solution = [node.action for node in path if node.parent is not None]
+        frames = [node.state for node in path]
+        return solution, path, root, explored, frames
+    else:
+        return None
 
-
+solution, _, root, explored, _ = search(*parse_puzzle(read_file(INPUT)))
 print("\n")
 if len(explored) >= iteration_limit:
     print("attempt timed out")
@@ -198,7 +213,7 @@ elif not solution:
     print("no solution")
 else:
     print(
-        f"search time: {round(time.time() - start,5)} seconds"
+        f"search time: {round(time.time() - START_TIME,5)} seconds"
         f"\n# of solution steps = {len(solution)}"
         f"\nsolution: {solution}"
     )

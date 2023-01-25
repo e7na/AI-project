@@ -205,7 +205,7 @@ def search(puzzle, dimensions):
     else:
         return None
 
-solution, _, root, explored, _ = search(*parse_puzzle(read_file(INPUT)))
+solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))
 print("\n")
 if len(explored) >= iteration_limit:
     print("attempt timed out")

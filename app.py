@@ -25,7 +25,7 @@ def gui(page: Page):
     block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
     value = lambda s: s if s != PLACEHOLDER else SLOT
     empty = lambda s: True if s != PLACEHOLDER else False
-    FALLBACK_WIDTH = 150
+    FALLBACK_WIDTH = 87
 
     # fmt: off
     blocks = [[TextField(

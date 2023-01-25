@@ -1,5 +1,5 @@
 # Sliding Puzzle Solver using traditional search
-## [Try the GUI online now](https://flet-sliding-puzzle.fly.dev/)
+## [GUI is a work in progress, but you can check it out here](https://flet-sliding-puzzle.fly.dev/)
 ## [Tree visualization example](./Source.gv.pdf)
 ## Setup Instructions
 1. Install [graphviz](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/7.0.4/windows_10_cmake_Release_graphviz-install-7.0.4-win64.exe), and add it to system PATH

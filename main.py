@@ -11,11 +11,14 @@ PLACEHOLDER = -1
 
 INPUT = "puzzle.txt"
 
+
 def read_file(file_path):
     with open(file_path) as p:
         return p.read()
 
     # convert the board to an integer matrix
+
+
 def parse_puzzle(puzzle):
     puzzle = puzzle.splitlines()
     puzzle = np.array(
@@ -138,12 +141,10 @@ def apply_move(move, state):
     return new_state
 
 
-def search(puzzle, dimensions):
+def search(puzzle, dimensions, algo="GBFS"):
     """Initialise search parameters"""
     root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-    # frontier = StackFrontier()  # DFS
-    # frontier = QueueFrontier()  # BFS
-    frontier = GBFSFrontier()  # GBFS
+    frontier = FronierOptions[algo]()  # GBFS
     frontier.add(root)
     explored = []
     solution = []
@@ -204,6 +205,7 @@ def search(puzzle, dimensions):
         return solution, path, root, explored, frames
     else:
         return None
+
 
 if __name__ == "__main__":
     solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))

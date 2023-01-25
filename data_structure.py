@@ -1,5 +1,6 @@
 class Node:
-    def __init__(self, state, parent=None, children=None, action=None, heuristic=None, is_sol=None):
+    # fmt: off
+    def __init__(self, state, parent=None, children=None, action=None, heuristic=None, is_sol=None):  # fmt: on
         self.state = state
         self.parent = parent
         self.action = action
@@ -9,7 +10,6 @@ class Node:
         if self.parent is not None:
             self.parent.add_child(self)
 
-        
     # def reverse(self, copy=False):
     #     _next = None
     #     if copy:
@@ -25,14 +25,13 @@ class Node:
     #             current.parent = _next
     #             _next, current = current, _prev
 
-            
     def add_child(self, child):
         if self.children is None:
             self.children = []
         if child is not None:
             self.children.append(child)
 
-            
+
 # for the DFS
 class QueueFrontier:
     def __init__(self):
@@ -46,7 +45,7 @@ class QueueFrontier:
 
     def contains_state(self, state):
         return any((n.state == state).all() for n in self.frontier)
-    
+
     def add(self, state):
         # add to the top of the stack, which is the end of the array
         self.frontier.append(state)
@@ -80,3 +79,11 @@ class StackFrontier(QueueFrontier):
             self.frontier = self.frontier[:-1]
             # then return it
             return top
+
+
+FronierOptions = {
+    # "A*" : Frontier,
+    "GBFS": GBFSFrontier,
+    "DFS": StackFrontier,
+    "BFS": QueueFrontier,
+}

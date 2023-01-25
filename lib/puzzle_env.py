@@ -1,39 +1,17 @@
-import time
+from lib.data_structure import *
 import numpy as np
-from data_structure import *
-from util import *
-from yamete import *
 
 # initializing the puzzle properties
 SLOT = "  "
 SEPARATOR = "|"
 PLACEHOLDER = -1
 
-INPUT = "puzzle.txt"
-
-
-def read_file(file_path):
-    with open(file_path) as p:
-        return p.read()
-
-    # convert the board to an integer matrix
-
-
-def parse_puzzle(puzzle):
-    puzzle = puzzle.splitlines()
-    puzzle = np.array(
-        [
-            [
-                int(element) if element != SLOT else PLACEHOLDER
-                for element in row.split(SEPARATOR)
-            ]
-            for row in puzzle
-        ],
-        dtype=np.int8,
-    )
-    height, width = puzzle.shape
-    return puzzle, (height, width)
-
+FronierOptions = {
+    # "A*" : Frontier,
+    "GBFS": GBFSFrontier,
+    "DFS": StackFrontier,
+    "BFS": QueueFrontier,
+}
 
 # check if the current state is the goal state
 def is_goal(state):
@@ -141,84 +119,41 @@ def apply_move(move, state):
     return new_state
 
 
-def search(puzzle, dimensions, algo="GBFS"):
-    """Initialise search parameters"""
-    root = Node(state=puzzle, parent=None, action=None, is_sol=1)
-    frontier = FronierOptions[algo]()  # GBFS
-    frontier.add(root)
-    explored = []
-    solution = []
-    path = []
-    global START_TIME, iteration_limit
-    START_TIME = time.time()
-    iteration_limit = 5000
-    height, width = dimensions
-
-    print()
-    """main search loop"""
-    while not frontier.is_empty() and len(explored) <= iteration_limit:
-        # realtime feedback to determine whether it's hung up or not
-        print(
-            f"\033[Ffrontier length: {len(frontier)}"
-            f"\nexplored length: {len(explored)}",
-            end="",
-        )
-        # remove a node from the frontier
-        if not (current := frontier.remove()):
-            break
-        # add its state to the explored
-        explored.append(current.state)
-
-        # if the current state is the goal, then generate
-        # the solution steps list and exit out to print it
-        if is_goal(current.state):
-            leaf = current
-            while current.parent is not None:
-                current.is_sol = 1
-                # prepend current.action to the solution list
-                # solution = [current.action, *solution]
-                path = [current, *path]
-                # then move up the path one step
-                current = current.parent
-            path = [current, *path]
-            break
-
-        ## expanding the node
-        # for each possible move from the current state
-        for possible_move in children(current.state, dimensions):
-            new_guess = apply_move(possible_move, current.state)
-            # if the state resulting from this move is neither explored nor in the frontier
-            in_explored = any((new_guess == state).all() for state in explored)
-            if not frontier.contains_state(new_guess) and not in_explored:
-                # then put it in a new node and add it to the frontier
-                child = Node(
-                    state=new_guess,
-                    parent=current,
-                    action=possible_move[0],
-                    heuristic=distance(new_guess, width),
-                )
-                frontier.add(child)
-
-    if path:
-        solution = [node.action for node in path if node.parent is not None]
-        frames = [node.state for node in path]
-        return solution, path, root, explored, frames
-    else:
-        return None
+def swap_right(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # swap the slot with the block on its left in the row
+    state[slot_y, slot_x], state[slot_y, slot_x - 1] = (
+        state[slot_y, slot_x - 1],
+        state[slot_y, slot_x],
+    )
+    return state
 
 
-if __name__ == "__main__":
-    solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))
-    print("\n")
-    if len(explored) >= iteration_limit:
-        print("attempt timed out")
-    elif not solution:
-        print("no solution")
-    else:
-        print(
-            f"search time: {round(time.time() - START_TIME,5)} seconds"
-            f"\n# of solution steps = {len(solution)}"
-            f"\nsolution: {solution}"
-        )
-        graph = lv.objviz(root)
-        graph.view()
+def swap_left(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # swap the slot with the block on its right in the row
+    state[slot_y, slot_x], state[slot_y, slot_x + 1] = (
+        state[slot_y, slot_x + 1],
+        state[slot_y, slot_x],
+    )
+    return state
+
+
+def swap_up(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # swap the slot with the block below it in the same column
+    state[slot_y, slot_x], state[slot_y + 1, slot_x] = (
+        state[slot_y + 1, slot_x],
+        state[slot_y, slot_x],
+    )
+    return state
+
+
+def swap_down(state, slot_coords):
+    slot_x, slot_y = slot_coords
+    # swap the slot with the block above it in the same column
+    state[slot_y, slot_x], state[slot_y - 1, slot_x] = (
+        state[slot_y - 1, slot_x],
+        state[slot_y, slot_x],
+    )
+    return state

@@ -79,11 +79,3 @@ class StackFrontier(QueueFrontier):
             self.frontier = self.frontier[:-1]
             # then return it
             return top
-
-
-FronierOptions = {
-    # "A*" : Frontier,
-    "GBFS": GBFSFrontier,
-    "DFS": StackFrontier,
-    "BFS": QueueFrontier,
-}

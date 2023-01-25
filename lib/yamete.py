@@ -1,7 +1,5 @@
 import lolviz as lv
 
-# from lolviz import *
-
 
 def gr_dict_html(
     title, items, highlight=None, bgcolor=lv.YELLOW, separator="&rarr;", reprkey=True

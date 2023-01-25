@@ -1,5 +1,8 @@
 from flet import *
-from main import np, time, PLACEHOLDER, SLOT, parse_puzzle, read_file, search
+import time
+import numpy as np
+from lib.puzzle_env import PLACEHOLDER, SLOT, FronierOptions
+from search import read_file, parse_puzzle, search
 
 puzzle = parse_puzzle(read_file("puzzle.txt"))
 _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
@@ -8,13 +11,13 @@ frames = search(*puzzle)[-1]
 
 def gui(page: Page):
     TITLE = "A* Sliding Puzzle"
-    page.title = TITLE 
+    page.title = TITLE
     page.vertical_alignment = "center"
     page.on_resize = lambda e: blocks_map(update_width)
     # Define a Starting Window Size
     page.window_width = 550
     # This is Not Right:
-    page.window_height = (BOARD_HEIGHT * 90) + 120
+    page.window_height = (BOARD_HEIGHT * 90)
     page.window_min_width = 550
     # page.window_min_height = 650
     page.theme_mode = "dark"
@@ -29,7 +32,9 @@ def gui(page: Page):
     empty = lambda s: True if s != PLACEHOLDER else False
     FALLBACK_WIDTH = 87
     TT_WIDTH = 110
-    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH) #+ TT_WIDTH
+    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(
+        FALLBACK_WIDTH
+    )  # + TT_WIDTH
 
     # fmt: off
     blocks = [[TextField(
@@ -159,4 +164,6 @@ def gui(page: Page):
     steps_summary.current.value = steps_string()
     page.update()
 
-if frames: app(target=gui, port=8080)
+
+if frames and __name__ == "__main__":
+    app(target=gui, port=8080)

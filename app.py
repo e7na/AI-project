@@ -6,7 +6,8 @@ from search import read_file, parse_puzzle, search
 
 puzzle = parse_puzzle(read_file("puzzle.txt"))
 _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
-_, path, _, _, frames = search(*puzzle)
+path = search(*puzzle)[1]
+frames = lambda index: path[index].state
 
 
 def gui(page: Page):
@@ -29,8 +30,9 @@ def gui(page: Page):
     steps_summary = Ref[Text]()
     action = Ref[Text]()
     heuristic = Ref[Text]()
+    move_count = Ref[Text]()
 
-    steps_string = lambda: f"{index+1} of {len(frames)}"
+    steps_string = lambda: f"{index+1} of {len(path)}"
 
     FALLBACK_WIDTH = 87
     width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
@@ -50,11 +52,11 @@ def gui(page: Page):
                 width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
                 read_only=True, border_color="blue200",
             ) for block in row
-        ] for row in frames[index]]
+        ] for row in frames(index)]
 
     def blocks_map(fn):
         nonlocal blocks
-        for (x, y), block in np.ndenumerate(frames[index]):
+        for (x, y), block in np.ndenumerate(frames(index)):
             fn(x, y, block, blocks)
         page.update()
 
@@ -72,14 +74,15 @@ def gui(page: Page):
         tooltips.current.height = page.window_height - 80
         action.current.value = str(path[index].action)
         heuristic.current.value = str(path[index].heuristic)
+        move_count.current.value = len(c) if (c:=path[index].children) else 0
         page.update()
 
     def next_frame(e):
         nonlocal index
-        if index < len(frames) - 1:
+        if index < len(path) - 1:
             index += 1
             update_content()
-        if index == len(frames) - 1:
+        if index == len(path) - 1:
             steps_summary.current.color = "green"
             steps_summary.current.value = "Goal Reached!"
             page.update()
@@ -92,7 +95,7 @@ def gui(page: Page):
             update_content()
     
     def auto_solve(e):
-        for _ in frames[index::]:
+        for _ in path[index::]:
             next_frame(e)
             time.sleep(0.4)
 
@@ -112,7 +115,7 @@ def gui(page: Page):
         title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
         center_title=True, bgcolor="blue200", toolbar_height=70,
         actions=[theme_button])
-            
+       
     page.add(Row([
 
             Column([
@@ -162,6 +165,12 @@ def gui(page: Page):
                         ], spacing=3, alignment="center"),
                     height=62),
 
+                Container(Column([
+                            Text("Possible moves:", weight="bold"),
+                            Text(ref=move_count, color="blue200", weight="bold"),
+                        ], spacing=3, alignment="center"),
+                    height=62),
+
                 ElevatedButton("Solve", disabled=True, height=59, width=TOOLTIPS_WIDTH,
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
             ], ref=tooltips, height=page.window_height, wrap=True, spacing=8)
@@ -170,6 +179,5 @@ def gui(page: Page):
 
     update_content()
 
-
-if frames and __name__ == "__main__":
+if path and __name__ == "__main__":
     app(target=gui, port=8080)

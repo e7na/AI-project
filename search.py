@@ -89,14 +89,14 @@ def search(
 
     if path:
         solution = [node.action for node in path if node.parent is not None]
-        states = [node.state for node in path]
-        return solution, path, root, explored, states
+        # states = [node.state for node in path]
+        return solution, path, root, explored
     else:
         return None
 
 
 if __name__ == "__main__":
-    solution, _, root, explored, frames = search(*parse_puzzle(read_file(INPUT)))
+    solution, _, root, explored = search(*parse_puzzle(read_file(INPUT)))
     print("\n")
     if len(explored) >= iteration_limit:
         print("attempt timed out")

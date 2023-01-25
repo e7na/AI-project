@@ -7,8 +7,8 @@ def gui(page: Page):
     page.vertical_alignment = "center"
     page.on_resize = lambda e: blocks_map(update_width)
     # Define a Starting Window Size
-    # page.window_width = 500
-    # page.window_height = 720
+    page.window_width = 500
+    page.window_height = 720
     page.window_min_width = 500
     page.window_min_height = 700
     # page.appbar = AppBar(title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"), center_title=True, bgcolor="blue200",toolbar_height=70)
@@ -16,7 +16,7 @@ def gui(page: Page):
     buttons = Ref[Text]()
     steps_summary = Ref[Text]()
     steps_string = lambda: f"Step {index+1} of {len(frames)}"
-    width_equation = lambda: (pw * 0.7 / BOARD_WIDTH) if (pw:=page.window_width) else 100
+    width_equation = lambda: page.window_width * 0.7 / (BOARD_WIDTH)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
     value = lambda s: s if s != PLACEHOLDER else SLOT
     empty = lambda s: True if s != PLACEHOLDER else False
@@ -92,4 +92,4 @@ def gui(page: Page):
     page.update()
 
 
-if frames: app(target=gui, port=8080, view=WEB_BROWSER)
+if frames: app(target=gui, port=8080)

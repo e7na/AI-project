@@ -7,7 +7,8 @@ frames = search(*puzzle)[-1]
 
 
 def gui(page: Page):
-    page.title = "Sliding Puzzle"
+    TITLE = "A* Sliding Puzzle"
+    page.title = TITLE 
     page.vertical_alignment = "center"
     page.on_resize = lambda e: blocks_map(update_width)
     # Define a Starting Window Size
@@ -92,7 +93,7 @@ def gui(page: Page):
         style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
 
     page.appbar = AppBar(
-        title=Text("Sliding Puzzle", color=colors.BACKGROUND, weight="bold"),
+        title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
         center_title=True, bgcolor="blue200", toolbar_height=70,
         actions=[theme_button])
             

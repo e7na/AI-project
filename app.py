@@ -179,5 +179,6 @@ def gui(page: Page):
 
     update_content()
 
+
 if path and __name__ == "__main__":
     app(target=gui, port=8080)

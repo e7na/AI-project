@@ -17,8 +17,8 @@
    ```pipenv shell```
 3. run it!!!  
    ```python app.py``` for GUI  
-   or ```python main.py``` for Graphviz tree  
+   or ```python search.py``` for Graphviz tree  
 **or**  
 2. run the project directly through pipenv  
    ```pipenv run python app.py```  
-   ```pipenv run python main.py```
+   ```pipenv run python search.py```

@@ -27,7 +27,9 @@ def parse_puzzle(puzzle):
     return puzzle, (height, width)
 
 
-def search(puzzle, dimensions, algo="GBFS"):
+def search(
+    puzzle, dimensions, algo="GBFS"
+) -> tuple[list[str], list[Node], Node, list[np.ndarray], list[np.ndarray]]:
     """Initialise search parameters"""
     root = Node(state=puzzle, parent=None, action=None, is_sol=1)
     frontier = FronierOptions[algo]()  # GBFS
@@ -87,8 +89,8 @@ def search(puzzle, dimensions, algo="GBFS"):
 
     if path:
         solution = [node.action for node in path if node.parent is not None]
-        frames = [node.state for node in path]
-        return solution, path, root, explored, frames
+        states = [node.state for node in path]
+        return solution, path, root, explored, states
     else:
         return None
 

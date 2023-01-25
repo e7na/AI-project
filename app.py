@@ -6,36 +6,43 @@ from search import read_file, parse_puzzle, search
 
 puzzle = parse_puzzle(read_file("puzzle.txt"))
 _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
-frames = search(*puzzle)[-1]
-
+_, path, _, _, frames = search(*puzzle)
 
 
 def gui(page: Page):
+    index = 0
+
     TITLE = "A* Sliding Puzzle"
+
     page.title = TITLE
     page.vertical_alignment = "center"
-    page.on_resize = lambda e: blocks_map(update_width)
-    # Define a Starting Window Size
-    page.window_width = 550
-    # This is Not Right:
-    page.window_height = (BOARD_HEIGHT * 90)
-    page.window_min_width = 550
-    # page.window_min_height = 650
     page.theme_mode = "dark"
-    index = 0
+    page.update()
+    page.window_min_width = 550
+    page.window_min_height = (BOARD_HEIGHT + 1) * 50
+    page.window_width = 550
+    page.window_height = BOARD_HEIGHT * 90
+    page.on_resize = lambda e: blocks_map(update_width)
+
     frame_switcher = Ref[Text]()
+    tooltips = Ref[Column]()
     steps_summary = Ref[Text]()
     action = Ref[Text]()
-    tooltips = Ref[Column]()
+    heuristic = Ref[Text]()
+
     steps_string = lambda: f"{index+1} of {len(frames)}"
-    width_equation = lambda: page.window_width * 0.65 / (BOARD_WIDTH)
-    block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
-    value = lambda s: s if s != PLACEHOLDER else SLOT
-    not_empty = lambda s: bool(s != PLACEHOLDER)
 
     FALLBACK_WIDTH = 87
-    TOOLTIPS_WIDTH = 110
+    width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
+    block_width_or = (
+        lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
+    )
+
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
+    TOOLTIPS_WIDTH = 110
+
+    value = lambda block: block if block != PLACEHOLDER else SLOT
+    not_empty = lambda block: bool(block != PLACEHOLDER)
 
     # fmt: off
     blocks = [[TextField(
@@ -49,7 +56,6 @@ def gui(page: Page):
         nonlocal blocks
         for (x, y), block in np.ndenumerate(frames[index]):
             fn(x, y, block, blocks)
-        tooltips.current.height = page.window_height - 80
         page.update()
 
     def update_width(x, y, b, m): 
@@ -60,15 +66,19 @@ def gui(page: Page):
         m[x][y].value = str(value(b))
         m[x][y].disabled = not_empty(b)
 
-    def update_board():
-        steps_summary.current.value = steps_string()
+    def update_content():
         blocks_map(update_value)
+        steps_summary.current.value = steps_string()
+        tooltips.current.height = page.window_height - 80
+        action.current.value = str(path[index].action)
+        heuristic.current.value = str(path[index].heuristic)
+        page.update()
 
     def next_frame(e):
         nonlocal index
         if index < len(frames) - 1:
             index += 1
-            update_board()
+            update_content()
         if index == len(frames) - 1:
             steps_summary.current.color = "green"
             steps_summary.current.value = "Goal Reached!"
@@ -79,7 +89,7 @@ def gui(page: Page):
         if index > 0:
             index -= 1
             steps_summary.current.color = "blue200"
-            update_board()
+            update_content()
     
     def auto_solve(e):
         for _ in frames[index::]:
@@ -107,7 +117,7 @@ def gui(page: Page):
 
             Column([
                 # the TextField matrix that displays the board
-                *[Row([txt for txt in row],alignment="center")for row in blocks],
+                *[Row([txt for txt in row], alignment="center")for row in blocks],
 
                 Container(height=10),
 
@@ -122,9 +132,9 @@ def gui(page: Page):
             Column([
                 Dropdown(
                     width=TOOLTIPS_WIDTH,
-                    height=57, border_radius=10, border_width=0, content_padding=16,
-                    value=list(FronierOptions.keys())[0], filled = True, alignment=alignment.center,
-                    options=[
+                    height=57, border_radius=10, border_width=0, filled=True,
+                    value=list(FronierOptions.keys())[0], content_padding=16,
+                    alignment=alignment.center, options=[
                         dropdown.Option(algo) for algo in FronierOptions.keys()
                     ]),
                 
@@ -142,14 +152,13 @@ def gui(page: Page):
 
                 Container(Column([
                             Text("Heuristic:", weight="bold"),
-                            Text("6")
+                            Text(ref=heuristic)
                         ], spacing=3, alignment="center"),
                     height=59),
 
                 Container(Column([
                             Text("Step:", weight="bold"),
-                            Text(ref=steps_summary, value=steps_string(),
-                                color="blue200", weight="bold"),
+                            Text(ref=steps_summary, color="blue200", weight="bold"),
                         ], spacing=3, alignment="center"),
                     height=62),
 
@@ -159,7 +168,7 @@ def gui(page: Page):
 
         ],alignment="center", vertical_alignment="start"))
 
-    page.update()
+    update_content()
 
 
 if frames and __name__ == "__main__":

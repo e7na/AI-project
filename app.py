@@ -16,17 +16,16 @@ def gui(page: Page):
     buttons = Ref[Text]()
     steps_summary = Ref[Text]()
     steps_string = lambda: f"Step {index+1} of {len(frames)}"
-    empty = lambda e: True if e!=PLACEHOLDER else False
     width_equation = lambda: page.window_width * 0.7/(BOARD_WIDTH)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn:=fn()) < x else x
     value = lambda s: s if s!=PLACEHOLDER else SLOT
+    empty = lambda s: True if s!=PLACEHOLDER else False
     FALLBACK_WIDTH = 150
-    blocks = [[ # the TextField matrix to display the puzzle
-            TextField(
+    blocks = [[TextField(
                 value=value(block), text_align="center", dense=True,
-                width=block_width_or(FALLBACK_WIDTH), disabled=empty(block), read_only=True, border_color="blue200",
-            )
-            for block in row
+                width=block_width_or(FALLBACK_WIDTH), disabled=empty(block),
+                read_only=True, border_color="blue200",
+            ) for block in row
         ] for row in frames[index]]
 
     def blocks_map(fn):
@@ -73,17 +72,20 @@ def gui(page: Page):
     page.add(*[Row([
                 txt for txt in row
             ], alignment="center")
-            for row in blocks])
+        for row in blocks])
 
-    page.add(Container(height = 10),Row([Row(ref=buttons, controls=[
-            OutlinedButton("Previous", on_click=prev_frame, expand=1),
-            FilledButton("Next", on_click=next_frame, expand=1),
-            ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
-        ], alignment="center",
-        width=button_width())],
+    page.add(Container(height = 10), Row([Row(ref=buttons, controls=[
+                OutlinedButton("Previous", on_click=prev_frame, expand=1),
+                FilledButton("Next", on_click=next_frame, expand=1),
+                ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
+            ], alignment="center",
+            width=button_width())],
         alignment="center"))
 
-    page.add(Container(height = 5),Row([Text(ref=steps_summary, color="blue200", weight="bold")], alignment="center"))
+    page.add(Container(height = 5), Row([
+            Text(ref=steps_summary, color="blue200", weight="bold")
+        ], alignment="center"))
+
     steps_summary.current.value = steps_string()
     page.update()
 

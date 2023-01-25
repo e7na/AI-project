@@ -9,6 +9,7 @@ _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
 frames = search(*puzzle)[-1]
 
 
+
 def gui(page: Page):
     TITLE = "A* Sliding Puzzle"
     page.title = TITLE
@@ -24,22 +25,22 @@ def gui(page: Page):
     index = 0
     frame_switcher = Ref[Text]()
     steps_summary = Ref[Text]()
+    action = Ref[Text]()
     tooltips = Ref[Column]()
     steps_string = lambda: f"{index+1} of {len(frames)}"
     width_equation = lambda: page.window_width * 0.65 / (BOARD_WIDTH)
     block_width_or = lambda x, fn=width_equation: dyn if (dyn := fn()) < x else x
     value = lambda s: s if s != PLACEHOLDER else SLOT
-    empty = lambda s: True if s != PLACEHOLDER else False
+    not_empty = lambda s: bool(s != PLACEHOLDER)
+
     FALLBACK_WIDTH = 87
-    TT_WIDTH = 110
-    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(
-        FALLBACK_WIDTH
-    )  # + TT_WIDTH
+    TOOLTIPS_WIDTH = 110
+    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
 
     # fmt: off
     blocks = [[TextField(
                 value=value(block), text_align="center", dense=True,
-                width=block_width_or(FALLBACK_WIDTH), disabled=empty(block),
+                width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
                 read_only=True, border_color="blue200",
             ) for block in row
         ] for row in frames[index]]
@@ -57,7 +58,7 @@ def gui(page: Page):
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
-        m[x][y].disabled = empty(b)
+        m[x][y].disabled = not_empty(b)
 
     def update_board():
         steps_summary.current.value = steps_string()
@@ -103,7 +104,8 @@ def gui(page: Page):
         actions=[theme_button])
             
     page.add(Row([
-        Column([
+
+            Column([
                 # the TextField matrix that displays the board
                 *[Row([txt for txt in row],alignment="center")for row in blocks],
 
@@ -111,35 +113,30 @@ def gui(page: Page):
 
                 Row([Row(ref=frame_switcher, controls=[
                         OutlinedButton("Previous", on_click=prev_frame, expand=1),
-                
                         FilledButton("Next", on_click=next_frame, expand=1),
-                
                         ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
                     ], alignment="center", width=frame_switcher_width())], alignment="center"),       
 
-        ], alignment="center", horizontal_alignment="center"),
+            ], alignment="center", horizontal_alignment="center"),
 
             Column([
                 Dropdown(
-                    width=TT_WIDTH,
+                    width=TOOLTIPS_WIDTH,
                     height=57, border_radius=10, border_width=0, content_padding=16,
-                    value="A*", filled = True, alignment=alignment.center,
+                    value=list(FronierOptions.keys())[0], filled = True, alignment=alignment.center,
                     options=[
-                        dropdown.Option("A*"),
-                        dropdown.Option("GBFS"),
-                        dropdown.Option("DFS"),
-                        dropdown.Option("BFS"),
+                        dropdown.Option(algo) for algo in FronierOptions.keys()
                     ]),
                 
-                ElevatedButton("Import", disabled=True, height=58, width=TT_WIDTH,
+                ElevatedButton("Import", disabled=True, height=58, width=TOOLTIPS_WIDTH,
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
 
-                ElevatedButton("Randomize", disabled=True, height=59, width=TT_WIDTH,
+                ElevatedButton("Randomize", disabled=True, height=59, width=TOOLTIPS_WIDTH,
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
 
                 Container(Column([
                             Text("Action:", weight="bold"),
-                            Text("Right")
+                            Text(ref=action)
                         ], spacing=3, alignment="center"),
                     height=58),
 
@@ -151,17 +148,17 @@ def gui(page: Page):
 
                 Container(Column([
                             Text("Step:", weight="bold"),
-                            Text(ref=steps_summary, color="blue200",weight="bold"),
+                            Text(ref=steps_summary, value=steps_string(),
+                                color="blue200", weight="bold"),
                         ], spacing=3, alignment="center"),
                     height=62),
 
-                ElevatedButton("Solve", disabled=True, height=59, width=TT_WIDTH,
+                ElevatedButton("Solve", disabled=True, height=59, width=TOOLTIPS_WIDTH,
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
             ], ref=tooltips, height=page.window_height, wrap=True, spacing=8)
 
         ],alignment="center", vertical_alignment="start"))
 
-    steps_summary.current.value = steps_string()
     page.update()
 
 

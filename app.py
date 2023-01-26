@@ -25,7 +25,7 @@ def gui(page: Page):
     page.vertical_alignment = "center"
     page.theme_mode = "dark"
     page.update()
-    page.window_min_width = 580
+    page.window_min_width = 550
     page.window_min_height = (BOARD_HEIGHT + 1) * 50
     page.window_width = 580
     page.window_height = (BOARD_HEIGHT * 90) + 70
@@ -256,6 +256,7 @@ def gui(page: Page):
         top_view = page.views[-1]
         page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
+        update_content()
 
     page.on_route_change = route_change
     page.on_view_pop = view_pop

@@ -2,7 +2,7 @@ from lib.data_structure import *
 import numpy as np
 
 # initializing the puzzle properties
-SLOT = "  "
+SLOT = "__"
 SEPARATOR = "|"
 PLACEHOLDER = -1
 

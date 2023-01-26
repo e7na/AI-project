@@ -17,7 +17,7 @@ def parse_puzzle(puzzle):
         [
             [
                 int(element) if element != SLOT else PLACEHOLDER
-                for element in row.split(SEPARATOR)
+                for element in row.replace(" ", "").split(SEPARATOR)
             ]
             for row in puzzle
         ],

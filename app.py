@@ -14,7 +14,12 @@ def gui(page: Page):
     index = 0
 
     TITLE = "A* Sliding Puzzle"
-    TUTORIAL = "Input a puzzle like the example provided, with consistent rectangular dimensions (like 3x3 or 4x7), where the empty place (2 spaces) is where the puzzle will start."
+    INSTRUCTIONS = (
+        f"Input your puzzle formatted as a grid of numbers separated by a '|' "
+        f"symbol, with the empty slot represented by two underscores '__' and "
+        f"each row on a separate line as shown below."
+        f"\nEnsure that the input grid is rectangular, and the numbers are unique."
+    )
     page.title = TITLE
     page.vertical_alignment = "center"
     page.theme_mode = "dark"
@@ -23,7 +28,11 @@ def gui(page: Page):
     page.window_min_height = (BOARD_HEIGHT + 1) * 50
     page.window_width = 550
     page.window_height = BOARD_HEIGHT * 90
-    page.on_resize = lambda e: blocks_map(update_width)
+
+    def resize_and_update():
+        blocks_map(update_width)
+        update_content()
+    page.on_resize = lambda e: resize_and_update 
 
     puzzle_input = Ref[TextField]()
     frame_switcher = Ref[Text]()
@@ -45,7 +54,7 @@ def gui(page: Page):
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
     TOOLTIPS_WIDTH = 110
 
-    value = lambda block: block if block != PLACEHOLDER else SLOT
+    value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
 
     # fmt: off
@@ -114,8 +123,9 @@ def gui(page: Page):
         style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
 
     def inputP(e):
-        global path, BOARD_HEIGHT, BOARD_WIDTH
+        global path, BOARD_HEIGHT, BOARD_WIDTH, index
         nonlocal blocks
+        index = 0
         puzzle = parse_puzzle(puzzle_input.current.value)
         _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
         path = search(*puzzle)[1]
@@ -127,8 +137,9 @@ def gui(page: Page):
         ] for row in frames(index)]
         controls = [Row(row, alignment="center") for row in blocks]
         board.current.controls = controls
-        update_content()
         view_pop(e)
+        resize_and_update()
+        update_content()
         
 
 
@@ -211,9 +222,9 @@ def gui(page: Page):
                     [
                         AppBar(title=Text("Input", color=colors.BACKGROUND, weight="bold"), center_title=True,
                         bgcolor="blue200",leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.BACKGROUND,)),
-                        Text(TUTORIAL, size=16, weight="w500"),
+                        Text(INSTRUCTIONS, size=16, weight="w500"),
                         Container(height=10),
-                        TextField(ref=puzzle_input,label="Puzzle", multiline=True,min_lines=3, value= str(read_file("puzzle.txt"))),
+                        TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt"))),
                         Container(height=10),
                         ElevatedButton("DONE", on_click=inputP, width=TOOLTIPS_WIDTH,
                         height=60, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),

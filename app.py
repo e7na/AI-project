@@ -57,8 +57,13 @@ def gui(page: Page):
     heuristic = Ref[Text]()
     move_count = Ref[Text]()
     board = Ref[Column]()
+    Ba = Ref[ElevatedButton]()
+    Bn = Ref[ElevatedButton]()
+    Bp = Ref[ElevatedButton]()
+    Bs = Ref[ElevatedButton]()
 
     steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
+    disable = lambda: False if SOLVED else True
 
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
@@ -102,6 +107,8 @@ def gui(page: Page):
         page.update()
         path = search(*puzzle)[1]
         SOLVED = True
+        Bn.current.disabled = Bp.current.disabled = Ba.current.disabled = disable()
+        Bs.current.disabled = True
         update_content()
 
     # fmt: off
@@ -205,18 +212,24 @@ def gui(page: Page):
                                         "Previous",
                                         on_click=prev_frame,
                                         expand=1,
+                                        disabled=disable(),
+                                        ref=Bp,
                                         height=BUTTON_HEIGHT,
                                         style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                    FilledButton(
+                                    ElevatedButton(
                                         "Next",
                                         on_click=next_frame,
                                         expand=1,
                                         height=BUTTON_HEIGHT,
+                                        disabled=disable(),
+                                        ref=Bn,
                                         style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
                                     ElevatedButton(
                                         "Auto",
                                         on_click=auto_solve,
                                         expand=1,
+                                        disabled=disable(),
+                                        ref=Ba,
                                         height=BUTTON_HEIGHT,
                                         style=BUTTON_STYLE)],
                                 width=frame_switcher_width())],)], ref=board,),
@@ -300,6 +313,7 @@ def gui(page: Page):
                                 "Solve",
                                 height=BUTTON_HEIGHT,
                                 width=TOOLTIPS_WIDTH,
+                                ref=Bs,
                                 style=BUTTON_STYLE,
                                 on_click=solve_puzzle)])
                     ])]))

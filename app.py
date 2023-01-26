@@ -5,14 +5,14 @@ from lib.puzzle_env import PLACEHOLDER, SLOT, FronierOptions
 from search import read_file, parse_puzzle, search
 
 puzzle = parse_puzzle(read_file("puzzle.txt"))
-_, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
+BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
 path = search(*puzzle)[1]
 frames = lambda index: path[index].state
 
 
 def gui(page: Page):
     index = 0
-
+    SOLVED = True
     TITLE = "A* Sliding Puzzle"
     INSTRUCTIONS = (
         f"Input your puzzle formatted as a grid of numbers separated by a '|' "
@@ -32,7 +32,8 @@ def gui(page: Page):
     def resize_and_update():
         blocks_map(update_width)
         update_content()
-    page.on_resize = lambda e: resize_and_update 
+
+    page.on_resize = lambda e: resize_and_update
 
     puzzle_input = Ref[TextField]()
     frame_switcher = Ref[Text]()
@@ -43,7 +44,11 @@ def gui(page: Page):
     move_count = Ref[Text]()
     board = Ref[Column]()
 
-    steps_string = lambda: f"{index+1} of {len(path)}"
+    def steps_string():
+        if SOLVED:
+            return f"{index+1} of {len(path)}"
+        else:
+            return "Press Solve"
 
     FALLBACK_WIDTH = 87
     width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
@@ -58,16 +63,35 @@ def gui(page: Page):
     not_empty = lambda block: bool(block != PLACEHOLDER)
 
     # fmt: off
-    blocks = [[TextField(
+
+    def load_puzzle(e):
+        global BOARD, BOARD_HEIGHT, BOARD_WIDTH
+        nonlocal SOLVED, index, blocks
+        index = 0
+        SOLVED = False
+        puzzle = parse_puzzle(puzzle_input.current.value)
+        BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
+        generate_grid(BOARD)
+        controls = [Row(row, alignment="center") for row in blocks]
+        board.current.controls = controls
+        view_pop(e)
+        resize_and_update()
+        update_content()
+
+    def generate_grid(board):
+        nonlocal blocks
+        return (blocks := [[TextField(
                 value=value(block), text_align="center", dense=True,
                 width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
                 read_only=True, border_color="blue200",
             ) for block in row
-        ] for row in frames(index)]
+        ] for row in (board if isinstance(board, np.ndarray) else board(index))])
+    blocks = generate_grid(BOARD)
 
     def blocks_map(fn):
         nonlocal blocks
-        for (x, y), block in np.ndenumerate(frames(index)):
+        global BOARD
+        for (x, y), block in np.ndenumerate(BOARD if not SOLVED else frames(index)):
             fn(x, y, block, blocks)
         page.update()
 
@@ -83,9 +107,13 @@ def gui(page: Page):
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
         tooltips.current.height = page.window_height - 80
-        action.current.value = str(path[index].action)
-        heuristic.current.value = str(path[index].heuristic)
-        move_count.current.value = len(c) if (c:=path[index].children) else 0
+        action.current.value = str(path[index].action if SOLVED else None)
+        heuristic.current.value = str(path[index].heuristic if SOLVED else None)
+        move_count.current.value = (
+            "Unknown" if not SOLVED
+                 else len(c) if (c:=path[index].children)
+                    else 0
+        )
         page.update()
 
     def next_frame(e):
@@ -121,27 +149,6 @@ def gui(page: Page):
         icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.BLACK,
         icon_size=30, tooltip="change theme", on_click=change_theme,
         style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
-
-    def inputP(e):
-        global path, BOARD_HEIGHT, BOARD_WIDTH, index
-        nonlocal blocks
-        index = 0
-        puzzle = parse_puzzle(puzzle_input.current.value)
-        _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
-        path = search(*puzzle)[1]
-        blocks = [[TextField(
-                value=value(block), text_align="center", dense=True,
-                width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
-                read_only=True, border_color="blue200",
-            ) for block in row
-        ] for row in frames(index)]
-        controls = [Row(row, alignment="center") for row in blocks]
-        board.current.controls = controls
-        view_pop(e)
-        resize_and_update()
-        update_content()
-        
-
 
 
     def route_change(route):
@@ -226,7 +233,7 @@ def gui(page: Page):
                         Container(height=10),
                         TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt"))),
                         Container(height=10),
-                        ElevatedButton("DONE", on_click=inputP, width=TOOLTIPS_WIDTH,
+                        ElevatedButton("DONE", on_click=load_puzzle, width=TOOLTIPS_WIDTH,
                         height=60, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
                     ],
                 )

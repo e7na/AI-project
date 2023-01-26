@@ -6,13 +6,13 @@ from search import read_file, parse_puzzle, search
 
 puzzle = parse_puzzle(read_file("puzzle.txt"))
 BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
-path = search(*puzzle)[1]
+# path = search(*puzzle)[1]
+path = []
 frames = lambda index: path[index].state
-
 
 def gui(page: Page):
     index = 0
-    SOLVED = True
+    SOLVED = False
     TITLE = "A* Sliding Puzzle"
     INSTRUCTIONS = (
         f"Input your puzzle formatted as a grid of numbers separated by a '|' "
@@ -65,7 +65,7 @@ def gui(page: Page):
     not_empty = lambda block: bool(block != PLACEHOLDER)
 
     def load_puzzle(e):
-        global BOARD, BOARD_HEIGHT, BOARD_WIDTH
+        global BOARD, BOARD_HEIGHT, BOARD_WIDTH, puzzle
         nonlocal SOLVED, index, blocks
         index = 0
         SOLVED = False
@@ -75,9 +75,17 @@ def gui(page: Page):
         controls = [Row(row, alignment="center") for row in blocks]
         board.current.controls = controls
         page.window_height = (BOARD_HEIGHT * 90) + 70
-        view_pop(e)
         resize_and_update()
+        view_pop(e)
+        # update_content()
+
+    def solve_puzzle(e):
+        global path, puzzle
+        nonlocal SOLVED
+        path = search(*puzzle)[1]
+        SOLVED = True
         update_content()
+        
 
     # fmt: off
     def generate_grid(board):
@@ -90,6 +98,7 @@ def gui(page: Page):
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
     # fmt: on
     blocks = generate_grid(BOARD)
+
 
     def blocks_map(fn):
         nonlocal blocks
@@ -160,9 +169,14 @@ def gui(page: Page):
         page.views.clear()
         page.views.append(
             View("/", [
-                AppBar(title=Text(TITLE, color=colors.PRIMARY, weight="bold"), center_title=True,
-                    bgcolor=colors.PRIMARY_CONTAINER, toolbar_height=70, actions=[theme_button]),
-                Row(alignment="center", vertical_alignment="start", control=[
+                AppBar(
+                    title=Text(TITLE, color=colors.PRIMARY, weight="bold"),
+                    center_title=True,
+                    bgcolor=colors.PRIMARY_CONTAINER,
+                    toolbar_height=70,
+                    actions=[theme_button]),
+
+                Row(alignment="center", vertical_alignment="start", controls=[
                     Column([
                         # the TextField matrix that displays the board
                         *[Row(row, alignment="center") for row in blocks],
@@ -200,80 +214,80 @@ def gui(page: Page):
                         wrap=True,
                         spacing=8,
                         controls=[
-                        Dropdown(
-                            width=TOOLTIPS_WIDTH,
-                            height=57,
-                            border_radius=10,
-                            border_width=0,
-                            content_padding=16,
-                            filled=True,
-                            alignment=alignment.center,
-                            value=list(FronierOptions.keys())[0],
-                            options=[
-                                dropdown.Option(algo) for algo in FronierOptions.keys()]),
-                        
-                        ElevatedButton(
-                            "Input",
-                            height=58,
-                            width=TOOLTIPS_WIDTH,
-                            style=BUTTON_STYLE,
-                            on_click=lambda e: page.go("/input")),
+                            Dropdown(
+                                width=TOOLTIPS_WIDTH,
+                                height=57,
+                                border_radius=10,
+                                border_width=0,
+                                content_padding=16,
+                                filled=True,
+                                alignment=alignment.center,
+                                value=list(FronierOptions.keys())[0],
+                                options=[
+                                    dropdown.Option(algo) for algo in FronierOptions.keys()]),
+                            
+                            ElevatedButton(
+                                "Input",
+                                height=58,
+                                width=TOOLTIPS_WIDTH,
+                                style=BUTTON_STYLE,
+                                on_click=lambda e: page.go("/input")),
 
-                        ElevatedButton(
-                            "Randomize",
-                            height=58,
-                            width=TOOLTIPS_WIDTH,
-                            style=BUTTON_STYLE,
-                            disabled=True),
+                            ElevatedButton(
+                                "Randomize",
+                                height=58,
+                                width=TOOLTIPS_WIDTH,
+                                style=BUTTON_STYLE,
+                                disabled=True),
 
-                        Container(
-                            Column([
-                                    Text(
-                                        "Action:",
-                                        weight="bold"),
-                                    Text(ref=action)],
-                                spacing=3,
-                                alignment=ac_aligment()),
-                            height=58),
+                            Container(
+                                Column([
+                                        Text(
+                                            "Action:",
+                                            weight="bold"),
+                                        Text(ref=action)],
+                                    spacing=3,
+                                    alignment=ac_aligment()),
+                                height=58),
 
-                        Container(
-                            Column([
-                                    Text(
-                                        "Heuristic:",
-                                        weight="bold"),
-                                    Text(ref=heuristic)],
-                                spacing=3,
-                                alignment="start"),
-                            height=58),
+                            Container(
+                                Column([
+                                        Text(
+                                            "Heuristic:",
+                                            weight="bold"),
+                                        Text(ref=heuristic)],
+                                    spacing=3,
+                                    alignment="start"),
+                                height=58),
 
-                        Container(Column([
-                                    Text(
-                                        "Step:",
-                                        weight="bold"),
-                                    Text(ref=steps_summary,
-                                    color=colors.PRIMARY,
-                                    weight="bold")],
-                                spacing=3,
-                                alignment="start"),
-                            height=58),
+                            Container(Column([
+                                        Text(
+                                            "Step:",
+                                            weight="bold"),
+                                        Text(ref=steps_summary,
+                                        color=colors.PRIMARY,
+                                        weight="bold")],
+                                    spacing=3,
+                                    alignment="start"),
+                                height=58),
 
-                        Container(Column([
-                                    Text(
-                                        "Possible moves:",
-                                        weight="bold"),
-                                    Text(ref=move_count,
-                                    color=colors.PRIMARY,
-                                    weight="bold")],
-                                spacing=3,
-                                alignment="start"),
-                            height=69),
+                            Container(Column([
+                                        Text(
+                                            "Possible moves:",
+                                            weight="bold"),
+                                        Text(ref=move_count,
+                                        color=colors.PRIMARY,
+                                        weight="bold")],
+                                    spacing=3,
+                                    alignment="start"),
+                                height=69),
 
-                        ElevatedButton(
-                            "Solve",
-                            height=58,
-                            width=TOOLTIPS_WIDTH,
-                            style=BUTTON_STYLE,
-                            disabled=True, )])
+                            ElevatedButton(
+                                "Solve",
+                                height=58,
+                                width=TOOLTIPS_WIDTH,
+                                style=BUTTON_STYLE,
+                                on_click=solve_puzzle)])
                     ])]))
 
         if page.route == "/input":
@@ -307,5 +321,5 @@ def gui(page: Page):
     update_content()
 
 
-if path and __name__ == "__main__":
+if __name__ == "__main__":
     app(target=gui, port=8080, assets_dir="assets")

@@ -145,18 +145,24 @@ def gui(page: Page):
         theme_button.selected = not theme_button.selected
         page.update()
 
-    # fmt: off
     # button to change theme_mode (from dark to light mode, or the reverse)
-    theme_button = IconButton(icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY, icon_size=30,
-        on_click=change_theme, tooltip="change theme", style=ButtonStyle(color=colors.PRIMARY))
+    theme_button = IconButton(
+        icons.DARK_MODE,
+        selected_icon=icons.LIGHT_MODE,
+        icon_color=colors.PRIMARY,
+        icon_size=30,
+        on_click=change_theme,
+        tooltip="change theme",
+        style=ButtonStyle(color=colors.PRIMARY))
 
+    # fmt: off
     def route_change(route):
         page.views.clear()
         page.views.append(
             View("/", [
                 AppBar(title=Text(TITLE, color=colors.PRIMARY, weight="bold"), center_title=True,
                     bgcolor=colors.PRIMARY_CONTAINER, toolbar_height=70, actions=[theme_button]),
-                Row([
+                Row(alignment="center", vertical_alignment="start", control=[
                     Column([
                         # the TextField matrix that displays the board
                         *[Row(row, alignment="center") for row in blocks],
@@ -164,55 +170,111 @@ def gui(page: Page):
                         Container(),
 
                         Row([Row(ref=frame_switcher, controls=[
-                                OutlinedButton("Previous", on_click=prev_frame, expand=1, height=58,
-                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                FilledButton("Next", on_click=next_frame, expand=1, height=58,
-                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                ElevatedButton("Auto", on_click=auto_solve, expand=1, height=58, style=BUTTON_STYLE)
-                            ], alignment="center", width=frame_switcher_width())], alignment="center"),       
+                                    OutlinedButton(
+                                        "Previous",
+                                        on_click=prev_frame,
+                                        expand=1,
+                                        height=58,
+                                        style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                                    FilledButton(
+                                        "Next",
+                                        on_click=next_frame,
+                                        expand=1,
+                                        height=58,
+                                        style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                                    ElevatedButton(
+                                        "Auto",
+                                        on_click=auto_solve,
+                                        expand=1,
+                                        height=58,
+                                        style=BUTTON_STYLE)],
+                                alignment="center",
+                                width=frame_switcher_width())],
+                            alignment="center")], 
+        
+                        ref=board, alignment="center", horizontal_alignment="center"),
 
-                    ], ref=board, alignment="center", horizontal_alignment="center"),
-
-                    Column(ref=tooltips, height=page.window_height - 70, wrap=True, spacing=8, controls=[
-                        Dropdown(width=TOOLTIPS_WIDTH, height=57, border_radius=10, border_width=0, content_padding=16,
-                            filled=True, alignment=alignment.center, value=list(FronierOptions.keys())[0], options=[
-                                dropdown.Option(algo) for algo in FronierOptions.keys()
-                            ]),
+                    Column(
+                        ref=tooltips,
+                        height=page.window_height - 70,
+                        wrap=True,
+                        spacing=8,
+                        controls=[
+                        Dropdown(
+                            width=TOOLTIPS_WIDTH,
+                            height=57,
+                            border_radius=10,
+                            border_width=0,
+                            content_padding=16,
+                            filled=True,
+                            alignment=alignment.center,
+                            value=list(FronierOptions.keys())[0],
+                            options=[
+                                dropdown.Option(algo) for algo in FronierOptions.keys()]),
                         
-                        ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
-                            on_click=lambda e: page.go("/input"),),
+                        ElevatedButton(
+                            "Input",
+                            height=58,
+                            width=TOOLTIPS_WIDTH,
+                            style=BUTTON_STYLE,
+                            on_click=lambda e: page.go("/input")),
 
-                        ElevatedButton("Randomize", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
+                        ElevatedButton(
+                            "Randomize",
+                            height=58,
+                            width=TOOLTIPS_WIDTH,
+                            style=BUTTON_STYLE,
                             disabled=True),
 
-                        Container(Column([
-                                    Text("Action:", weight="bold"),
-                                    Text(ref=action,)
-                                ], spacing=3, alignment=ac_aligment()),
+                        Container(
+                            Column([
+                                    Text(
+                                        "Action:",
+                                        weight="bold"),
+                                    Text(ref=action)],
+                                spacing=3,
+                                alignment=ac_aligment()),
+                            height=58),
+
+                        Container(
+                            Column([
+                                    Text(
+                                        "Heuristic:",
+                                        weight="bold"),
+                                    Text(ref=heuristic)],
+                                spacing=3,
+                                alignment="start"),
                             height=58),
 
                         Container(Column([
-                                    Text("Heuristic:", weight="bold"),
-                                    Text(ref=heuristic)
-                                ], spacing=3, alignment="start"),
+                                    Text(
+                                        "Step:",
+                                        weight="bold"),
+                                    Text(ref=steps_summary,
+                                    color=colors.PRIMARY,
+                                    weight="bold")],
+                                spacing=3,
+                                alignment="start"),
                             height=58),
 
                         Container(Column([
-                                    Text("Step:", weight="bold"),
-                                    Text(ref=steps_summary, color=colors.PRIMARY, weight="bold"),
-                                ], spacing=3, alignment="start"),
-                            height=58),
-
-                        Container(Column([
-                                    Text("Possible moves:", weight="bold"),
-                                    Text(ref=move_count, color=colors.PRIMARY, weight="bold"),
-                                ], spacing=3, alignment="start"),
+                                    Text(
+                                        "Possible moves:",
+                                        weight="bold"),
+                                    Text(ref=move_count,
+                                    color=colors.PRIMARY,
+                                    weight="bold")],
+                                spacing=3,
+                                alignment="start"),
                             height=69),
 
-                        ElevatedButton("Solve", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
+                        ElevatedButton(
+                            "Solve",
+                            height=58,
+                            width=TOOLTIPS_WIDTH,
+                            style=BUTTON_STYLE,
                             disabled=True, )])
-
-                ], alignment="center", vertical_alignment="start")]))
+                    ])]))
 
         if page.route == "/input":
             page.window_height = 550

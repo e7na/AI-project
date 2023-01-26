@@ -20,10 +20,10 @@ def gui(page: Page):
         f"each row on a separate line as shown below."
         f"\nEnsure that the input grid is rectangular, and the numbers are unique."
     )
-    BUTTON_STYLE= ButtonStyle(shape=RoundedRectangleBorder(radius=10))
+    BUTTON_STYLE = ButtonStyle(shape=RoundedRectangleBorder(radius=10))
     page.title = TITLE
     page.vertical_alignment = "center"
-    page.dark_theme = page.theme =Theme(color_scheme_seed=colors.DEEP_PURPLE_ACCENT_100)
+    page.dark_theme = page.theme = Theme(color_scheme_seed=colors.PURPLE_ACCENT_100)
     page.theme_mode = "dark"
     page.update()
     page.window_min_width = 550
@@ -64,7 +64,7 @@ def gui(page: Page):
 
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
     TOOLTIPS_WIDTH = 110
-    
+
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
 
@@ -153,9 +153,9 @@ def gui(page: Page):
 
     # button to change theme_mode (from dark to light mode, or the reverse)
     theme_button = IconButton(
-        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY_CONTAINER,
+        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY,
         icon_size=30, tooltip="change theme", on_click=change_theme,
-        style=ButtonStyle(color=colors.PRIMARY_CONTAINER))
+        style=ButtonStyle(color=colors.PRIMARY))
 
 
     def route_change(route):
@@ -164,8 +164,8 @@ def gui(page: Page):
             View(
                 "/",
                 [
-                    AppBar(title=Text(TITLE, color=colors.PRIMARY_CONTAINER, weight="bold"),
-                    center_title=True, bgcolor=colors.PRIMARY, toolbar_height=70, actions=[theme_button]),
+                    AppBar(title=Text(TITLE, color=colors.PRIMARY, weight="bold"), center_title=True,
+                    bgcolor=colors.PRIMARY_CONTAINER, toolbar_height=70, actions=[theme_button]),
                     Row([
 
             Column([

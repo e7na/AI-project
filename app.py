@@ -11,6 +11,13 @@ path = []
 frames = lambda index: path[index].state
 
 
+def get_or(callable, default):
+    try:
+        return callable()
+    except ValueError:
+        return default
+
+
 def gui(page: Page):
     index = 0
     SOLVED = False
@@ -30,6 +37,9 @@ def gui(page: Page):
     page.window_min_width = 550
     BUTTON_HEIGHT = 58
     page.window_min_height = (BOARD_HEIGHT + 1) * BUTTON_HEIGHT
+    FALLBACK_HEIGHT = page.window_min_height
+    page.window_width = 580
+    page.window_height = (BOARD_HEIGHT * 90) + 70
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
     }
@@ -51,14 +61,22 @@ def gui(page: Page):
 
     steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
 
-    FALLBACK_WIDTH = 150
-    width_equation = lambda: (pw * 0.65 / (BOARD_WIDTH)) if (pw:=page.window_width) else 87
+    MAX_WIDTH = 150
+    FALLBACK_WIDTH = 87
+
+    width_equation = lambda: get_or(
+        lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
+    )
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
     )
-    ac_aligment = lambda: "center" if page.window_height < 400 else "start"
+    ac_aligment = (
+        lambda: "center"
+        if get_or(lambda: page.window_width, FALLBACK_HEIGHT) < 400
+        else "start"
+    )
 
-    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
+    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(MAX_WIDTH)
     TOOLTIPS_WIDTH = 110
 
     value = lambda block: block if block != PLACEHOLDER else "  "
@@ -92,7 +110,7 @@ def gui(page: Page):
         nonlocal blocks
         return (blocks := [[TextField(
                 value=value(block), text_align="center", dense=True,
-                width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
+                width=block_width_or(MAX_WIDTH), disabled=not_empty(block),
                 read_only=True, border_color=colors.PRIMARY,
             ) for block in row
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
@@ -107,7 +125,7 @@ def gui(page: Page):
         page.update()
 
     def update_width(x, y, b, m):
-        m[x][y].width = block_width_or(FALLBACK_WIDTH)
+        m[x][y].width = block_width_or(MAX_WIDTH)
         frame_switcher.current.width = frame_switcher_width()
 
     def update_value(x, y, b, m):
@@ -117,7 +135,7 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.current.height = page.window_height - 70
+        tooltips.current.height = get_or(lambda: page.window_width, FALLBACK_HEIGHT)
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -210,7 +228,7 @@ def gui(page: Page):
 
                     Column(
                         ref=tooltips,
-                        height=page.window_height - 70,
+                        height=get_or(lambda: page.window_height - 70, FALLBACK_HEIGHT),
                         wrap=True,
                         spacing=8,
                         controls=[

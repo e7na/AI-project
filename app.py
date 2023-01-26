@@ -10,6 +10,7 @@ BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
 path = []
 frames = lambda index: path[index].state
 
+
 def gui(page: Page):
     index = 0
     SOLVED = False
@@ -38,7 +39,7 @@ def gui(page: Page):
         blocks_map(update_width)
         update_content()
 
-    page.on_resize = lambda e: resize_and_update
+    page.on_resize = lambda e: resize_and_update()
 
     puzzle_input = Ref[TextField]()
     frame_switcher = Ref[Text]()
@@ -51,7 +52,7 @@ def gui(page: Page):
 
     steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
 
-    FALLBACK_WIDTH = 87
+    FALLBACK_WIDTH = 150
     width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
@@ -77,7 +78,6 @@ def gui(page: Page):
         page.window_height = (BOARD_HEIGHT * 90) + 70
         resize_and_update()
         view_pop(e)
-        # update_content()
 
     def solve_puzzle(e):
         global path, puzzle
@@ -85,7 +85,6 @@ def gui(page: Page):
         path = search(*puzzle)[1]
         SOLVED = True
         update_content()
-        
 
     # fmt: off
     def generate_grid(board):
@@ -98,7 +97,6 @@ def gui(page: Page):
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
     # fmt: on
     blocks = generate_grid(BOARD)
-
 
     def blocks_map(fn):
         nonlocal blocks
@@ -162,7 +160,8 @@ def gui(page: Page):
         icon_size=30,
         on_click=change_theme,
         tooltip="change theme",
-        style=ButtonStyle(color=colors.PRIMARY))
+        style=ButtonStyle(color=colors.PRIMARY),
+    )
 
     # fmt: off
     def route_change(route):

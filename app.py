@@ -30,7 +30,6 @@ def gui(page: Page):
     )
     BUTTON_STYLE = ButtonStyle(shape=RoundedRectangleBorder(radius=10))
     page.title = TITLE
-    page.vertical_alignment = "center"
     page.dark_theme = page.theme = Theme(color_scheme_seed=colors.PURPLE_ACCENT_100)
     page.theme_mode = "dark"
     page.update()
@@ -90,7 +89,7 @@ def gui(page: Page):
         puzzle = parse_puzzle(puzzle_input.current.value)
         BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
         generate_grid(BOARD)
-        controls = [Row(row, alignment="center") for row in blocks]
+        controls = [Row(row) for row in blocks]
         board.current.controls = controls
         page.window_height = (BOARD_HEIGHT * 90) + 70
         resize_and_update()
@@ -194,10 +193,10 @@ def gui(page: Page):
                     toolbar_height=70,
                     actions=[theme_button]),
 
-                Row(alignment="center", vertical_alignment="start", controls=[
+                Row(alignment="center",vertical_alignment="center",controls=[
                     Column([
                         # the TextField matrix that displays the board
-                        *[Row(row, alignment="center") for row in blocks],
+                        *[Row(row) for row in blocks],
 
                         Container(),
 
@@ -220,16 +219,13 @@ def gui(page: Page):
                                         expand=1,
                                         height=BUTTON_HEIGHT,
                                         style=BUTTON_STYLE)],
-                                alignment="center",
-                                width=frame_switcher_width())],
-                            alignment="center")], 
-        
-                        ref=board, alignment="center", horizontal_alignment="center"),
+                                width=frame_switcher_width())],)], ref=board,),
 
                     Column(
                         ref=tooltips,
                         height=get_or(lambda: page.window_height - 70, FALLBACK_HEIGHT),
                         wrap=True,
+                        alignment="center",
                         spacing=8,
                         controls=[
                             Dropdown(

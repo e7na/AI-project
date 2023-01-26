@@ -32,6 +32,7 @@ def gui(page: Page):
     action = Ref[Text]()
     heuristic = Ref[Text]()
     move_count = Ref[Text]()
+    board = Ref[Column]()
 
     steps_string = lambda: f"{index+1} of {len(path)}"
 
@@ -113,12 +114,21 @@ def gui(page: Page):
         style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
 
     def inputP(e):
-        global path
+        global path, BOARD_HEIGHT, BOARD_WIDTH
+        nonlocal blocks
         puzzle = parse_puzzle(puzzle_input.current.value)
         _, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
         path = search(*puzzle)[1]
-        view_pop(e)
+        blocks = [[TextField(
+                value=value(block), text_align="center", dense=True,
+                width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
+                read_only=True, border_color="blue200",
+            ) for block in row
+        ] for row in frames(index)]
+        controls = [Row(row, alignment="center") for row in blocks]
+        board.current.controls = controls
         update_content()
+        view_pop(e)
         
 
 
@@ -135,7 +145,7 @@ def gui(page: Page):
 
             Column([
                 # the TextField matrix that displays the board
-                *[Row([txt for txt in row], alignment="center")for row in blocks],
+                *[Row(row, alignment="center") for row in blocks],
 
                 Container(height=10),
 
@@ -145,7 +155,7 @@ def gui(page: Page):
                         ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
                     ], alignment="center", width=frame_switcher_width())], alignment="center"),       
 
-            ], alignment="center", horizontal_alignment="center"),
+            ], ref=board, alignment="center", horizontal_alignment="center"),
 
             Column([
                 Dropdown(

@@ -37,7 +37,7 @@ def gui(page: Page):
     page.window_min_width = 550
     BUTTON_HEIGHT = 58
     page.window_min_height = (BOARD_HEIGHT + 1) * BUTTON_HEIGHT
-    FALLBACK_HEIGHT = page.window_min_height
+    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 70
     page.window_width = 580
     page.window_height = (BOARD_HEIGHT * 90) + 70
     page.fonts = {

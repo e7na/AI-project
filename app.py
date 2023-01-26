@@ -23,6 +23,7 @@ def gui(page: Page):
     BUTTON_STYLE= ButtonStyle(shape=RoundedRectangleBorder(radius=10))
     page.title = TITLE
     page.vertical_alignment = "center"
+    page.dark_theme = page.theme =Theme(color_scheme_seed=colors.DEEP_PURPLE_ACCENT_100)
     page.theme_mode = "dark"
     page.update()
     page.window_min_width = 550
@@ -89,7 +90,7 @@ def gui(page: Page):
         return (blocks := [[TextField(
                 value=value(block), text_align="center", dense=True,
                 width=block_width_or(FALLBACK_WIDTH), disabled=not_empty(block),
-                read_only=True, border_color="blue200",
+                read_only=True, border_color=colors.PRIMARY,
             ) for block in row
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
     blocks = generate_grid(BOARD)
@@ -136,7 +137,7 @@ def gui(page: Page):
         nonlocal index
         if index > 0:
             index -= 1
-            steps_summary.current.color = "blue200"
+            steps_summary.current.color = colors.PRIMARY
             update_content()
     
     def auto_solve(e):
@@ -152,9 +153,9 @@ def gui(page: Page):
 
     # button to change theme_mode (from dark to light mode, or the reverse)
     theme_button = IconButton(
-        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.BLACK,
+        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY_CONTAINER,
         icon_size=30, tooltip="change theme", on_click=change_theme,
-        style=ButtonStyle(color={"": colors.BACKGROUND, "selected": colors.WHITE}))
+        style=ButtonStyle(color=colors.PRIMARY_CONTAINER))
 
 
     def route_change(route):
@@ -163,8 +164,8 @@ def gui(page: Page):
             View(
                 "/",
                 [
-                    AppBar(title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
-                    center_title=True, bgcolor="blue200", toolbar_height=70, actions=[theme_button]),
+                    AppBar(title=Text(TITLE, color=colors.PRIMARY_CONTAINER, weight="bold"),
+                    center_title=True, bgcolor=colors.PRIMARY, toolbar_height=70, actions=[theme_button]),
                     Row([
 
             Column([
@@ -210,13 +211,13 @@ def gui(page: Page):
 
                 Container(Column([
                             Text("Step:", weight="bold"),
-                            Text(ref=steps_summary, color="blue200", weight="bold"),
+                            Text(ref=steps_summary, color=colors.PRIMARY, weight="bold"),
                         ], spacing=3, alignment="start"),
                     height=58),
 
                 Container(Column([
                             Text("Possible moves:", weight="bold"),
-                            Text(ref=move_count, color="blue200", weight="bold"),
+                            Text(ref=move_count, color=colors.PRIMARY, weight="bold"),
                         ], spacing=3, alignment="start"),
                     height=69),
 
@@ -233,8 +234,8 @@ def gui(page: Page):
                 View(
                     "/input",
                     [
-                        AppBar(title=Text("Input", color=colors.BACKGROUND, weight="bold"), center_title=True,
-                        bgcolor="blue200",leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.BACKGROUND,)),
+                        AppBar(title=Text("Input", color=colors.PRIMARY, weight="bold"), center_title=True,
+                        bgcolor=colors.PRIMARY_CONTAINER,leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.PRIMARY,)),
                         Text(INSTRUCTIONS, size=16, weight="w500"),
                         Container(height=10),
                         TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt")),

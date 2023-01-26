@@ -28,9 +28,8 @@ def gui(page: Page):
     page.theme_mode = "dark"
     page.update()
     page.window_min_width = 550
-    page.window_min_height = (BOARD_HEIGHT + 1) * 50
-    page.window_width = 580
-    page.window_height = (BOARD_HEIGHT * 90) + 70
+    BUTTON_HEIGHT = 58
+    page.window_min_height = (BOARD_HEIGHT + 1) * BUTTON_HEIGHT
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
     }
@@ -53,7 +52,7 @@ def gui(page: Page):
     steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
 
     FALLBACK_WIDTH = 150
-    width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
+    width_equation = lambda: (pw * 0.65 / (BOARD_WIDTH)) if (pw:=page.window_width) else 87
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
     )
@@ -189,19 +188,19 @@ def gui(page: Page):
                                         "Previous",
                                         on_click=prev_frame,
                                         expand=1,
-                                        height=58,
+                                        height=BUTTON_HEIGHT,
                                         style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
                                     FilledButton(
                                         "Next",
                                         on_click=next_frame,
                                         expand=1,
-                                        height=58,
+                                        height=BUTTON_HEIGHT,
                                         style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
                                     ElevatedButton(
                                         "Auto",
                                         on_click=auto_solve,
                                         expand=1,
-                                        height=58,
+                                        height=BUTTON_HEIGHT,
                                         style=BUTTON_STYLE)],
                                 alignment="center",
                                 width=frame_switcher_width())],
@@ -229,14 +228,14 @@ def gui(page: Page):
                             
                             ElevatedButton(
                                 "Input",
-                                height=58,
+                                height=BUTTON_HEIGHT,
                                 width=TOOLTIPS_WIDTH,
                                 style=BUTTON_STYLE,
                                 on_click=lambda e: page.go("/input")),
 
                             ElevatedButton(
                                 "Randomize",
-                                height=58,
+                                height=BUTTON_HEIGHT,
                                 width=TOOLTIPS_WIDTH,
                                 style=BUTTON_STYLE,
                                 disabled=True),
@@ -249,7 +248,7 @@ def gui(page: Page):
                                         Text(ref=action)],
                                     spacing=3,
                                     alignment=ac_aligment()),
-                                height=58),
+                                height=BUTTON_HEIGHT),
 
                             Container(
                                 Column([
@@ -259,7 +258,7 @@ def gui(page: Page):
                                         Text(ref=heuristic)],
                                     spacing=3,
                                     alignment="start"),
-                                height=58),
+                                height=BUTTON_HEIGHT),
 
                             Container(Column([
                                         Text(
@@ -270,7 +269,7 @@ def gui(page: Page):
                                         weight="bold")],
                                     spacing=3,
                                     alignment="start"),
-                                height=58),
+                                height=BUTTON_HEIGHT),
 
                             Container(Column([
                                         Text(
@@ -285,7 +284,7 @@ def gui(page: Page):
 
                             ElevatedButton(
                                 "Solve",
-                                height=58,
+                                height=BUTTON_HEIGHT,
                                 width=TOOLTIPS_WIDTH,
                                 style=BUTTON_STYLE,
                                 on_click=solve_puzzle)])

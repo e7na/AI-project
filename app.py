@@ -20,13 +20,14 @@ def gui(page: Page):
         f"each row on a separate line as shown below."
         f"\nEnsure that the input grid is rectangular, and the numbers are unique."
     )
+    BUTTON_STYLE= ButtonStyle(shape=RoundedRectangleBorder(radius=10))
     page.title = TITLE
     page.vertical_alignment = "center"
     page.theme_mode = "dark"
     page.update()
-    page.window_min_width = 550
+    page.window_min_width = 580
     page.window_min_height = (BOARD_HEIGHT + 1) * 50
-    page.window_width = 550
+    page.window_width = 580
     page.window_height = (BOARD_HEIGHT * 90) + 70
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
@@ -58,10 +59,11 @@ def gui(page: Page):
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
     )
+    ac_aligment = lambda: "center" if page.window_height < 400 else "start"
 
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(FALLBACK_WIDTH)
     TOOLTIPS_WIDTH = 110
-
+    
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
 
@@ -77,6 +79,7 @@ def gui(page: Page):
         generate_grid(BOARD)
         controls = [Row(row, alignment="center") for row in blocks]
         board.current.controls = controls
+        page.window_height = (BOARD_HEIGHT * 90) + 70
         view_pop(e)
         resize_and_update()
         update_content()
@@ -110,7 +113,7 @@ def gui(page: Page):
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
         tooltips.current.height = page.window_height - 70
-        action.current.value = str(path[index].action if SOLVED else None)
+        action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
             "Unknown" if not SOLVED
@@ -139,7 +142,7 @@ def gui(page: Page):
     def auto_solve(e):
         for _ in path[index::]:
             next_frame(e)
-            time.sleep(0.4)
+            time.sleep(0.6)
 
     def change_theme(e):
         # Switch Between dark and light mode
@@ -168,12 +171,12 @@ def gui(page: Page):
                 # the TextField matrix that displays the board
                 *[Row(row, alignment="center") for row in blocks],
 
-                Container(height=10),
+                Container(),
 
                 Row([Row(ref=frame_switcher, controls=[
-                        OutlinedButton("Previous", on_click=prev_frame, expand=1),
-                        FilledButton("Next", on_click=next_frame, expand=1),
-                        ElevatedButton("Auto Solve", on_click=auto_solve, expand=2)
+                        OutlinedButton("Previous", on_click=prev_frame, expand=1, height=58, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                        FilledButton("Next", on_click=next_frame, expand=1, height=58, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                        ElevatedButton("Auto", on_click=auto_solve, expand=1, height=58, style=BUTTON_STYLE)
                     ], alignment="center", width=frame_switcher_width())], alignment="center"),       
 
             ], ref=board, alignment="center", horizontal_alignment="center"),
@@ -187,38 +190,38 @@ def gui(page: Page):
                         dropdown.Option(algo) for algo in FronierOptions.keys()
                     ]),
                 
-                ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, on_click=lambda _: page.go("/input"),
-                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, on_click=goToInput,
+                    style=BUTTON_STYLE),
 
-                ElevatedButton("Randomize", disabled=True, height=59, width=TOOLTIPS_WIDTH,
-                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                ElevatedButton("Randomize", disabled=True, height=58, width=TOOLTIPS_WIDTH,
+                    style=BUTTON_STYLE),
 
                 Container(Column([
                             Text("Action:", weight="bold"),
-                            Text(ref=action)
-                        ], spacing=3, alignment="center"),
+                            Text(ref=action,)
+                        ], spacing=3, alignment=ac_aligment()),
                     height=58),
 
                 Container(Column([
                             Text("Heuristic:", weight="bold"),
                             Text(ref=heuristic)
-                        ], spacing=3, alignment="center"),
-                    height=59),
+                        ], spacing=3, alignment="start"),
+                    height=58),
 
                 Container(Column([
                             Text("Step:", weight="bold"),
                             Text(ref=steps_summary, color="blue200", weight="bold"),
-                        ], spacing=3, alignment="center"),
-                    height=62),
+                        ], spacing=3, alignment="start"),
+                    height=58),
 
                 Container(Column([
                             Text("Possible moves:", weight="bold"),
                             Text(ref=move_count, color="blue200", weight="bold"),
-                        ], spacing=3, alignment="center"),
-                    height=62),
+                        ], spacing=3, alignment="start"),
+                    height=69),
 
-                ElevatedButton("Solve", disabled=True, height=59, width=TOOLTIPS_WIDTH,
-                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                ElevatedButton("Solve", disabled=True, height=58, width=TOOLTIPS_WIDTH,
+                    style=BUTTON_STYLE),
             ], ref=tooltips, height=page.window_height - 70, wrap=True, spacing=8)
 
         ],alignment="center", vertical_alignment="start")
@@ -238,15 +241,20 @@ def gui(page: Page):
                         text_style=TextStyle(font_family="Fira Code"),),
                         Container(height=10),
                         ElevatedButton("DONE", on_click=load_puzzle, width=TOOLTIPS_WIDTH,
-                        height=60, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                        height=60, style=BUTTON_STYLE),
                     ],
                 )
             )
         page.update()
 
+    def goToInput(e):
+        page.window_height = 550
+        page.go("/input")
+
     def view_pop(view):
         page.views.pop()
         top_view = page.views[-1]
+        page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
 
     page.on_route_change = route_change

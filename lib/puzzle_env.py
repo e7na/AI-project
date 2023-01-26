@@ -7,10 +7,10 @@ SEPARATOR = "|"
 PLACEHOLDER = -1
 
 FronierOptions = {
-    # "A*" : Frontier,
+    "A*"  : GBFSFrontier,
     "GBFS": GBFSFrontier,
-    "DFS": StackFrontier,
-    "BFS": QueueFrontier,
+    "DFS" : StackFrontier,
+    "BFS" : QueueFrontier,
 }
 
 # check if the current state is the goal state

@@ -9,6 +9,7 @@ BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
 # path = search(*puzzle)[1]
 path = []
 frames = lambda index: path[index].state
+algo_key = list(FronierOptions.keys())[0]
 
 
 def get_or(callable, default):
@@ -57,10 +58,10 @@ def gui(page: Page):
     heuristic = Ref[Text]()
     move_count = Ref[Text]()
     board = Ref[Column]()
+    algo_dd = Ref[Dropdown]()
     solve_button = Ref[ElevatedButton]()
 
     steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
-    disable = lambda: False if SOLVED else True
 
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
@@ -102,10 +103,20 @@ def gui(page: Page):
         nonlocal SOLVED
         steps_summary.current.value = "Solving..."
         page.update()
-        path = search(*puzzle)[1]
+        path = search(*puzzle, algo_key)[1]
         SOLVED = True
-        frame_switcher.current.disabled = disable()
+        frame_switcher.current.disabled = False
         solve_button.current.disabled = True
+        update_content()
+
+    def change_algo(e):
+        global algo_key, path
+        nonlocal SOLVED
+        algo_key = algo_dd.current.value
+        path = None
+        SOLVED = False
+        solve_button.current.disabled = False
+        frame_switcher.current.disabled = True
         update_content()
 
     # fmt: off
@@ -197,7 +208,7 @@ def gui(page: Page):
                     toolbar_height=70,
                     actions=[theme_button]),
 
-                Row(alignment="center",vertical_alignment="center",controls=[
+                Row(alignment="center",vertical_alignment="start",controls=[
                     Column([
                         # the TextField matrix that displays the board
                         *[Row(row) for row in blocks],
@@ -238,9 +249,11 @@ def gui(page: Page):
                                 border_radius=10,
                                 border_width=0,
                                 content_padding=16,
+                                ref=algo_dd,
                                 filled=True,
+                                on_change=change_algo,
                                 alignment=alignment.center,
-                                value=list(FronierOptions.keys())[0],
+                                value=algo_key,
                                 options=[
                                     dropdown.Option(algo) for algo in FronierOptions.keys()]),
                             

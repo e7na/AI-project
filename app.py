@@ -49,11 +49,7 @@ def gui(page: Page):
     move_count = Ref[Text]()
     board = Ref[Column]()
 
-    def steps_string():
-        if SOLVED:
-            return f"{index+1} of {len(path)}"
-        else:
-            return "Press Solve"
+    steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
 
     FALLBACK_WIDTH = 87
     width_equation = lambda: (page.window_width * 0.65 / (BOARD_WIDTH))
@@ -67,8 +63,6 @@ def gui(page: Page):
 
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
-
-    # fmt: off
 
     def load_puzzle(e):
         global BOARD, BOARD_HEIGHT, BOARD_WIDTH
@@ -85,6 +79,7 @@ def gui(page: Page):
         resize_and_update()
         update_content()
 
+    # fmt: off
     def generate_grid(board):
         nonlocal blocks
         return (blocks := [[TextField(
@@ -93,6 +88,7 @@ def gui(page: Page):
                 read_only=True, border_color=colors.PRIMARY,
             ) for block in row
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
+    # fmt: on
     blocks = generate_grid(BOARD)
 
     def blocks_map(fn):
@@ -102,7 +98,7 @@ def gui(page: Page):
             fn(x, y, block, blocks)
         page.update()
 
-    def update_width(x, y, b, m): 
+    def update_width(x, y, b, m):
         m[x][y].width = block_width_or(FALLBACK_WIDTH)
         frame_switcher.current.width = frame_switcher_width()
 
@@ -117,9 +113,7 @@ def gui(page: Page):
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
-            "Unknown" if not SOLVED
-                 else len(c) if (c:=path[index].children)
-                    else 0
+            "Unknown" if not SOLVED else len(c) if (c := path[index].children) else 0
         )
         page.update()
 
@@ -139,7 +133,7 @@ def gui(page: Page):
             index -= 1
             steps_summary.current.color = colors.PRIMARY
             update_content()
-    
+
     def auto_solve(e):
         for _ in path[index::]:
             next_frame(e)
@@ -151,106 +145,91 @@ def gui(page: Page):
         theme_button.selected = not theme_button.selected
         page.update()
 
+    # fmt: off
     # button to change theme_mode (from dark to light mode, or the reverse)
-    theme_button = IconButton(
-        icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY,
-        icon_size=30, tooltip="change theme", on_click=change_theme,
-        style=ButtonStyle(color=colors.PRIMARY))
-
+    theme_button = IconButton(icons.DARK_MODE, selected_icon=icons.LIGHT_MODE, icon_color=colors.PRIMARY, icon_size=30,
+        on_click=change_theme, tooltip="change theme", style=ButtonStyle(color=colors.PRIMARY))
 
     def route_change(route):
         page.views.clear()
         page.views.append(
-            View(
-                "/",
-                [
-                    AppBar(title=Text(TITLE, color=colors.PRIMARY, weight="bold"), center_title=True,
+            View("/", [
+                AppBar(title=Text(TITLE, color=colors.PRIMARY, weight="bold"), center_title=True,
                     bgcolor=colors.PRIMARY_CONTAINER, toolbar_height=70, actions=[theme_button]),
-                    Row([
+                Row([
+                    Column([
+                        # the TextField matrix that displays the board
+                        *[Row(row, alignment="center") for row in blocks],
 
-            Column([
-                # the TextField matrix that displays the board
-                *[Row(row, alignment="center") for row in blocks],
+                        Container(),
 
-                Container(),
+                        Row([Row(ref=frame_switcher, controls=[
+                                OutlinedButton("Previous", on_click=prev_frame, expand=1, height=58,
+                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                                FilledButton("Next", on_click=next_frame, expand=1, height=58,
+                                    style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                                ElevatedButton("Auto", on_click=auto_solve, expand=1, height=58, style=BUTTON_STYLE)
+                            ], alignment="center", width=frame_switcher_width())], alignment="center"),       
 
-                Row([Row(ref=frame_switcher, controls=[
-                        OutlinedButton("Previous", on_click=prev_frame, expand=1, height=58, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                        FilledButton("Next", on_click=next_frame, expand=1, height=58, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                        ElevatedButton("Auto", on_click=auto_solve, expand=1, height=58, style=BUTTON_STYLE)
-                    ], alignment="center", width=frame_switcher_width())], alignment="center"),       
+                    ], ref=board, alignment="center", horizontal_alignment="center"),
 
-            ], ref=board, alignment="center", horizontal_alignment="center"),
+                    Column(ref=tooltips, height=page.window_height - 70, wrap=True, spacing=8, controls=[
+                        Dropdown(width=TOOLTIPS_WIDTH, height=57, border_radius=10, border_width=0, content_padding=16,
+                            filled=True, alignment=alignment.center, value=list(FronierOptions.keys())[0], options=[
+                                dropdown.Option(algo) for algo in FronierOptions.keys()
+                            ]),
+                        
+                        ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
+                            on_click=lambda e: page.go("/input"),),
 
-            Column([
-                Dropdown(
-                    width=TOOLTIPS_WIDTH,
-                    height=57, border_radius=10, border_width=0, filled=True,
-                    value=list(FronierOptions.keys())[0], content_padding=16,
-                    alignment=alignment.center, options=[
-                        dropdown.Option(algo) for algo in FronierOptions.keys()
-                    ]),
-                
-                ElevatedButton("Input", height=58, width=TOOLTIPS_WIDTH, on_click=goToInput,
-                    style=BUTTON_STYLE),
+                        ElevatedButton("Randomize", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
+                            disabled=True),
 
-                ElevatedButton("Randomize", disabled=True, height=58, width=TOOLTIPS_WIDTH,
-                    style=BUTTON_STYLE),
+                        Container(Column([
+                                    Text("Action:", weight="bold"),
+                                    Text(ref=action,)
+                                ], spacing=3, alignment=ac_aligment()),
+                            height=58),
 
-                Container(Column([
-                            Text("Action:", weight="bold"),
-                            Text(ref=action,)
-                        ], spacing=3, alignment=ac_aligment()),
-                    height=58),
+                        Container(Column([
+                                    Text("Heuristic:", weight="bold"),
+                                    Text(ref=heuristic)
+                                ], spacing=3, alignment="start"),
+                            height=58),
 
-                Container(Column([
-                            Text("Heuristic:", weight="bold"),
-                            Text(ref=heuristic)
-                        ], spacing=3, alignment="start"),
-                    height=58),
+                        Container(Column([
+                                    Text("Step:", weight="bold"),
+                                    Text(ref=steps_summary, color=colors.PRIMARY, weight="bold"),
+                                ], spacing=3, alignment="start"),
+                            height=58),
 
-                Container(Column([
-                            Text("Step:", weight="bold"),
-                            Text(ref=steps_summary, color=colors.PRIMARY, weight="bold"),
-                        ], spacing=3, alignment="start"),
-                    height=58),
+                        Container(Column([
+                                    Text("Possible moves:", weight="bold"),
+                                    Text(ref=move_count, color=colors.PRIMARY, weight="bold"),
+                                ], spacing=3, alignment="start"),
+                            height=69),
 
-                Container(Column([
-                            Text("Possible moves:", weight="bold"),
-                            Text(ref=move_count, color=colors.PRIMARY, weight="bold"),
-                        ], spacing=3, alignment="start"),
-                    height=69),
+                        ElevatedButton("Solve", height=58, width=TOOLTIPS_WIDTH, style=BUTTON_STYLE,
+                            disabled=True, )])
 
-                ElevatedButton("Solve", disabled=True, height=58, width=TOOLTIPS_WIDTH,
-                    style=BUTTON_STYLE),
-            ], ref=tooltips, height=page.window_height - 70, wrap=True, spacing=8)
+                ], alignment="center", vertical_alignment="start")]))
 
-        ],alignment="center", vertical_alignment="start")
-                ],
-            )
-        )
         if page.route == "/input":
+            page.window_height = 550
             page.views.append(
-                View(
-                    "/input",
-                    [
-                        AppBar(title=Text("Input", color=colors.PRIMARY, weight="bold"), center_title=True,
-                        bgcolor=colors.PRIMARY_CONTAINER,leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.PRIMARY,)),
-                        Text(INSTRUCTIONS, size=16, weight="w500"),
-                        Container(height=10),
-                        TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt")),
-                        text_style=TextStyle(font_family="Fira Code"),),
-                        Container(height=10),
-                        ElevatedButton("DONE", on_click=load_puzzle, width=TOOLTIPS_WIDTH,
-                        height=60, style=BUTTON_STYLE),
-                    ],
-                )
-            )
-        page.update()
+                View("/input", [
+                    AppBar(title=Text("Input", color=colors.PRIMARY, weight="bold"), center_title=True,
+                        bgcolor=colors.PRIMARY_CONTAINER, leading=IconButton(icons.ARROW_BACK, on_click=view_pop,
+                        icon_color=colors.PRIMARY,)),
+                    Text(INSTRUCTIONS, size=16, weight="w500"),
+                    Container(height=10),
+                    TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3,
+                        text_style=TextStyle(font_family="Fira Code"), value=str(read_file("puzzle.txt"))),
+                    Container(height=10),
+                    ElevatedButton("DONE", on_click=load_puzzle, width=TOOLTIPS_WIDTH, height=60, style=BUTTON_STYLE)]))
 
-    def goToInput(e):
-        page.window_height = 550
-        page.go("/input")
+        page.update()
+    # fmt: on
 
     def view_pop(view):
         page.views.pop()

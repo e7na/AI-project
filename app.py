@@ -27,7 +27,10 @@ def gui(page: Page):
     page.window_min_width = 550
     page.window_min_height = (BOARD_HEIGHT + 1) * 50
     page.window_width = 550
-    page.window_height = BOARD_HEIGHT * 90
+    page.window_height = (BOARD_HEIGHT * 90) + 70
+    page.fonts = {
+        "Fira Code": "/fonts/FiraCode-Regular.ttf",
+    }
 
     def resize_and_update():
         blocks_map(update_width)
@@ -106,7 +109,7 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.current.height = page.window_height - 80
+        tooltips.current.height = page.window_height - 70
         action.current.value = str(path[index].action if SOLVED else None)
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -158,7 +161,7 @@ def gui(page: Page):
                 "/",
                 [
                     AppBar(title=Text(TITLE, color=colors.BACKGROUND, weight="bold"),
-                    center_title=True, bgcolor="blue200", toolbar_height=70,actions=[theme_button]),
+                    center_title=True, bgcolor="blue200", toolbar_height=70, actions=[theme_button]),
                     Row([
 
             Column([
@@ -216,7 +219,7 @@ def gui(page: Page):
 
                 ElevatedButton("Solve", disabled=True, height=59, width=TOOLTIPS_WIDTH,
                     style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-            ], ref=tooltips, height=page.window_height, wrap=True, spacing=8)
+            ], ref=tooltips, height=page.window_height - 70, wrap=True, spacing=8)
 
         ],alignment="center", vertical_alignment="start")
                 ],
@@ -231,7 +234,8 @@ def gui(page: Page):
                         bgcolor="blue200",leading=IconButton(icons.ARROW_BACK, on_click = view_pop, icon_color=colors.BACKGROUND,)),
                         Text(INSTRUCTIONS, size=16, weight="w500"),
                         Container(height=10),
-                        TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt"))),
+                        TextField(ref=puzzle_input, label="Board", multiline=True, min_lines=3, value= str(read_file("puzzle.txt")),
+                        text_style=TextStyle(font_family="Fira Code"),),
                         Container(height=10),
                         ElevatedButton("DONE", on_click=load_puzzle, width=TOOLTIPS_WIDTH,
                         height=60, style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
@@ -253,4 +257,4 @@ def gui(page: Page):
 
 
 if path and __name__ == "__main__":
-    app(target=gui, port=8080)
+    app(target=gui, port=8080, assets_dir="assets")

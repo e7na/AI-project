@@ -82,6 +82,8 @@ def gui(page: Page):
     def solve_puzzle(e):
         global path, puzzle
         nonlocal SOLVED
+        steps_summary.current.value = "Solving..."
+        page.update()
         path = search(*puzzle)[1]
         SOLVED = True
         update_content()

@@ -62,7 +62,7 @@ def gui(page: Page):
     algo_dd = Ref[Dropdown]()
     solve_button = Ref[ElevatedButton]()
 
-    steps_string = lambda: f"{index+1} of {len(path)}" if SOLVED else "Press Solve"
+    steps_string = lambda: "Goal Reached!"  if (index + 1) == len(path) else f"{index + 1} of {len(path)}" if SOLVED else "Press Solve"
 
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
@@ -157,6 +157,10 @@ def gui(page: Page):
         move_count.current.value = (
             "Unknown" if not SOLVED else len(c) if (c := path[index].children) else 0
         )
+        if index == len(path) - 1:
+            steps_summary.current.color = "green"
+        else:
+            steps_summary.current.color = colors.PRIMARY
         page.update()
 
     def next_frame(e):
@@ -164,16 +168,11 @@ def gui(page: Page):
         if index < len(path) - 1:
             index += 1
             update_content()
-        if index == len(path) - 1:
-            steps_summary.current.color = "green"
-            steps_summary.current.value = "Goal Reached!"
-            page.update()
 
     def prev_frame(e):
         nonlocal index
         if index > 0:
             index -= 1
-            steps_summary.current.color = colors.PRIMARY
             update_content()
 
     def auto_solve(e):
@@ -346,6 +345,8 @@ def gui(page: Page):
         top_view = page.views[-1]
         page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
+        frame_switcher.current.disabled = False
+        solve_button.current.disabled = True
         update_content()
 
     page.on_route_change = route_change

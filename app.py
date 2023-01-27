@@ -36,7 +36,7 @@ def gui(page: Page):
     page.update()
     page.window_min_width = 550
     BUTTON_HEIGHT = 58
-    page.window_min_height = (BOARD_HEIGHT + 1) * BUTTON_HEIGHT
+    page.window_min_height = 100 #(BOARD_HEIGHT + 1) * BUTTON_HEIGHT
     FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 70
     page.window_width = 580
     page.window_height = (BOARD_HEIGHT * 90) + 70
@@ -208,8 +208,8 @@ def gui(page: Page):
                     toolbar_height=70,
                     actions=[theme_button]),
 
-                Row(alignment="center",vertical_alignment="start",controls=[
-                    Column([
+                Row(alignment="center",vertical_alignment="center", expand=True, controls=[
+                    Column(alignment="center",horizontal_alignment="center",controls=[
                         # the TextField matrix that displays the board
                         *[Row(row) for row in blocks],
 

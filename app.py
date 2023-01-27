@@ -36,10 +36,11 @@ def gui(page: Page):
     page.update()
     page.window_min_width = 550
     BUTTON_HEIGHT = 58
-    page.window_min_height = 100 #(BOARD_HEIGHT + 1) * BUTTON_HEIGHT
+    page.window_min_height = BOARD_HEIGHT * BUTTON_HEIGHT
     FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 70
     page.window_width = 580
-    page.window_height = (BOARD_HEIGHT * 90) + 70
+    window_height = lambda: (BOARD_HEIGHT * 90) + 140
+    page.window_height = window_height()
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
     }
@@ -94,27 +95,28 @@ def gui(page: Page):
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls
-        page.window_height = (BOARD_HEIGHT * 90) + 70
         resize_and_update()
         view_pop(e)
 
     def solve_puzzle(e):
-        global path, puzzle
+        global path, puzzle, algo_key
         nonlocal SOLVED
         steps_summary.current.value = "Solving..."
         page.update()
-        path = search(*puzzle, algo_key)[1]
-        SOLVED = True
-        frame_switcher.current.disabled = False
-        solve_button.current.disabled = True
+        if result := search(*puzzle, algo_key):
+            path, *_ = result
+            SOLVED = True
+            frame_switcher.current.disabled = False
+            solve_button.current.disabled = True
         update_content()
 
     def change_algo(e):
         global algo_key, path
         nonlocal SOLVED
         algo_key = algo_dd.current.value
-        path = None
+        path = []
         SOLVED = False
+        index = 0
         solve_button.current.disabled = False
         frame_switcher.current.disabled = True
         update_content()
@@ -177,7 +179,7 @@ def gui(page: Page):
     def auto_solve(e):
         for _ in path[index::]:
             next_frame(e)
-            time.sleep(0.6)
+            time.sleep(0.5)
 
     def change_theme(e):
         # Switch Between dark and light mode

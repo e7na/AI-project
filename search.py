@@ -29,7 +29,7 @@ def parse_puzzle(puzzle):
 
 def search(
     puzzle, dimensions, algo="GBFS"
-) -> tuple[list[str], list[Node], Node, list[np.ndarray], list[np.ndarray]]:
+) -> tuple[list[Node], list[str], Node, list[np.ndarray], list[np.ndarray]]:
     """Initialise search parameters"""
     root = Node(state=puzzle, parent=None, action=None, is_sol=1)
     frontier = FronierOptions[algo]()  # GBFS
@@ -90,13 +90,13 @@ def search(
     if path:
         solution = [node.action for node in path if node.parent is not None]
         # states = [node.state for node in path]
-        return solution, path, root, explored
+        return path, solution, root, explored
     else:
         return None
 
 
 if __name__ == "__main__":
-    solution, _, root, explored = search(*parse_puzzle(read_file(INPUT)))
+    _, solution, root, explored = search(*parse_puzzle(read_file(INPUT)))
     print("\n")
     if len(explored) >= iteration_limit:
         print("attempt timed out")

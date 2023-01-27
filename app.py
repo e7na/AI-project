@@ -89,6 +89,7 @@ def gui(page: Page):
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls
+        page.window_min_height = ((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + 70
         resize_and_update()
         view_pop(e)
 

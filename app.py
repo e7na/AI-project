@@ -36,9 +36,14 @@ def gui(page: Page):
     page.update()
     page.window_min_width = 550
     BUTTON_HEIGHT = 58
-    page.window_min_height = BOARD_HEIGHT * BUTTON_HEIGHT
+    MAX_WIDTH = 150
+    FALLBACK_WIDTH = 87
+    page.window_min_height = ((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + 70
     FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 70
-    page.window_width = 580
+    width_equation = lambda: get_or(
+        lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
+    )
+    page.window_width = BOARD_WIDTH * width_equation()
     window_height = lambda: (BOARD_HEIGHT * 90) + 140
     page.window_height = window_height()
     page.fonts = {
@@ -64,12 +69,6 @@ def gui(page: Page):
 
     steps_string = lambda: "Goal Reached!"  if (index + 1) == len(path) else f"{index + 1} of {len(path)}" if SOLVED else "Press Solve"
 
-    MAX_WIDTH = 150
-    FALLBACK_WIDTH = 87
-
-    width_equation = lambda: get_or(
-        lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
-    )
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
     )

@@ -73,11 +73,6 @@ def gui(page: Page):
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
     )
-    ac_aligment = (
-        lambda: "center"
-        if get_or(lambda: page.window_width, FALLBACK_HEIGHT) < 400
-        else "start"
-    )
 
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(MAX_WIDTH)
     TOOLTIPS_WIDTH = 110
@@ -214,8 +209,6 @@ def gui(page: Page):
                         # the TextField matrix that displays the board
                         *[Row(row) for row in blocks],
 
-                        Container(),
-
                         Row([Row(ref=frame_switcher, disabled=True, controls=[
                                     OutlinedButton(
                                         "Previous",
@@ -279,7 +272,7 @@ def gui(page: Page):
                                             weight="bold"),
                                         Text(ref=action)],
                                     spacing=3,
-                                    alignment=ac_aligment()),
+                                    alignment="start"),
                                 height=BUTTON_HEIGHT),
 
                             Container(
@@ -312,7 +305,7 @@ def gui(page: Page):
                                         weight="bold")],
                                     spacing=3,
                                     alignment="start"),
-                                height=69),
+                                height=BUTTON_HEIGHT),
 
                             ElevatedButton(
                                 "Solve",

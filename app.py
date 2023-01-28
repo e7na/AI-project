@@ -65,7 +65,6 @@ def gui(page: Page):
     page.on_resize = lambda e: resize_and_update()
 
     puzzle_input = Ref[TextField]()
-    frame_switcher = Ref[Row]()
     steps_summary = Ref[Text]()
     action = Ref[Text]()
     heuristic = Ref[Text]()
@@ -145,10 +144,10 @@ def gui(page: Page):
     def update_clickability():
         if SOLVED:
             solve_button.disabled = True
-            frame_switcher.current.disabled = False
+            frame_switcher[0].disabled = False
         else:
             solve_button.disabled = False
-            frame_switcher.current.disabled = True
+            frame_switcher[0].disabled = True
 
     def blocks_map(fn):
         nonlocal blocks
@@ -159,7 +158,7 @@ def gui(page: Page):
 
     def update_width(x, y, b, m):
         m[x][y].width = block_width_or(MAX_WIDTH)
-        frame_switcher.current.width = info_row[0].width = frame_switcher_width()
+        info_row[0].width = frame_switcher_width()
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
@@ -216,6 +215,27 @@ def gui(page: Page):
         style=ButtonStyle(color=colors.PRIMARY),
     )
 
+    frame_switcher = Row([Row(disabled=True, expand=True, controls=[
+                        OutlinedButton(
+                            icon=icons.ARROW_BACK,
+                            on_click=prev_frame,
+                            expand=1,
+                            height=BUTTON_HEIGHT,
+                            style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                        OutlinedButton(
+                            icon=icons.ARROW_FORWARD,
+                            on_click=next_frame,
+                            expand=1,
+                            height=BUTTON_HEIGHT,
+                            style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
+                        ElevatedButton(
+                            "Auto",
+                            on_click=auto_solve,
+                            expand=1,
+                            height=BUTTON_HEIGHT,
+                            style=BUTTON_STYLE)],
+                    width=frame_switcher_width())],),
+
     action_con = Container(Column([
                 Text(
                     "Action:",
@@ -270,9 +290,10 @@ def gui(page: Page):
     def set_widgets():
         nonlocal info_row, tooltips
         if BOARD_HEIGHT == 3:
-            info_row = Row(controls=[action_con[0],
+            info_row = (Column([Row(controls=[action_con[0],
                                         Steps[0],
-                                        possible_moves[0],], width=frame_switcher_width()),
+                                        possible_moves[0],],),
+                                        frame_switcher[0]],width=frame_switcher_width()),)
 
             tooltips = Column(
                     height=get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()),
@@ -313,7 +334,7 @@ def gui(page: Page):
                         solve_button,  
                             ])
         else:
-            info_row = (Container(),)
+            info_row = frame_switcher
             tooltips = Column(
                     height=get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()),
                     wrap=True,
@@ -377,26 +398,7 @@ def gui(page: Page):
 
                         info_row[0],
 
-                        Row([Row(ref=frame_switcher, disabled=True, controls=[
-                                    OutlinedButton(
-                                        icon=icons.ARROW_BACK,
-                                        on_click=prev_frame,
-                                        expand=1,
-                                        height=BUTTON_HEIGHT,
-                                        style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                    OutlinedButton(
-                                        icon=icons.ARROW_FORWARD,
-                                        on_click=next_frame,
-                                        expand=1,
-                                        height=BUTTON_HEIGHT,
-                                        style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                    ElevatedButton(
-                                        "Auto",
-                                        on_click=auto_solve,
-                                        expand=1,
-                                        height=BUTTON_HEIGHT,
-                                        style=BUTTON_STYLE)],
-                                width=frame_switcher_width())],),
+                        
                                 ],height=get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()), ref=board),
                     
                     tooltips,

@@ -87,7 +87,6 @@ def gui(page: Page):
 
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
-    expand = bool(BOARD_HEIGHT == 3)
 
     def load_puzzle(e):
         global BOARD, BOARD_HEIGHT, BOARD_WIDTH, puzzle
@@ -224,9 +223,8 @@ def gui(page: Page):
                 Text(ref=action,
                 color=colors.PRIMARY,
                 weight="w500")],
-            spacing=3,
-            alignment="start"),
-        height=BUTTON_HEIGHT, expand=expand),
+            spacing=3,),
+        height=BUTTON_HEIGHT, padding=padding.only(left=5)),
 
     heuristic_con = Container(Column([
                 Text(
@@ -235,9 +233,8 @@ def gui(page: Page):
                 Text(ref=heuristic,
                 color=colors.PRIMARY,
                 weight="w500")],
-            spacing=3,
-            alignment="start"),
-        height=BUTTON_HEIGHT, expand=False),
+            spacing=3,),
+        height=BUTTON_HEIGHT, padding=padding.only(left=5)),
 
     Steps = Container(Column([
                 Text(
@@ -246,9 +243,8 @@ def gui(page: Page):
                 Text(ref=steps_summary,
                 color=colors.PRIMARY,
                 weight="w500")],
-            spacing=3,
-            alignment="start"),
-        height=BUTTON_HEIGHT, expand=expand),
+            spacing=3,),
+        height=BUTTON_HEIGHT, padding=padding.only(left=5)),
 
     possible_moves = Container(Column([
                 Text(
@@ -257,9 +253,8 @@ def gui(page: Page):
                 Text(ref=move_count,
                 color=colors.PRIMARY,
                 weight="w500")],
-            spacing=3,
-            alignment="start"),
-        height=BUTTON_HEIGHT, expand=expand),
+            spacing=3,),
+        height=BUTTON_HEIGHT, padding=padding.only(left=5)),
 
     solve_button = ElevatedButton(
         "Solve",

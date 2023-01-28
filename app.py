@@ -94,6 +94,7 @@ def gui(page: Page):
         nonlocal SOLVED, index, blocks
         index = 0
         SOLVED = False
+        update_clickability()
         puzzle = parse_puzzle(puzzle_input.current.value)
         BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
         page.window_min_height = window_min_height()
@@ -115,6 +116,7 @@ def gui(page: Page):
         if result := search(*puzzle, algo_key):
             path, *_ = result
             SOLVED = True
+            update_clickability()
         update_content()
 
     def change_algo(e):
@@ -123,6 +125,7 @@ def gui(page: Page):
         algo_key = algo_dd.current.value
         path = []
         SOLVED = False
+        update_clickability()
         index = 0
         update_content()
 
@@ -137,6 +140,14 @@ def gui(page: Page):
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
     # fmt: on
     blocks = generate_grid(BOARD)
+
+    def update_clickability():
+        if SOLVED:
+            solve_button.current.disabled = True
+            frame_switcher.current.disabled = False
+        else: 
+            solve_button.current.disabled = False
+            frame_switcher.current.disabled = True
 
     def blocks_map(fn):
         nonlocal blocks
@@ -154,12 +165,6 @@ def gui(page: Page):
         m[x][y].disabled = not_empty(b)
 
     def update_content():
-        if SOLVED:
-            solve_button.current.disabled = True
-            frame_switcher.current.disabled = False
-        else: 
-            solve_button.current.disabled = False
-            frame_switcher.current.disabled = True
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
         tooltips.current.height = get_or(

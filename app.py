@@ -47,13 +47,13 @@ def gui(page: Page):
     )
     content_height = lambda: ((BOARD_HEIGHT + 2) * BUTTON_HEIGHT)
     window_min_height = lambda: content_height() + APPBAR_HEIGHT + PADDING
-    window_min_width = lambda: (
-        BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH * tooltips_columns() + 2 * PADDING
+    window_width_from = lambda block_width=FALLBACK_WIDTH: (
+        BOARD_WIDTH * block_width + TOOLTIPS_WIDTH * tooltips_columns() + PADDING
     )
     page.window_min_height = window_min_height()
-    page.window_min_width = window_min_width()
-    # page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
-    # page.window_height = content_height()
+    page.window_min_width = window_width_from()
+    page.window_width = window_width_from(110)
+    page.window_height = window_min_height()
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
     }
@@ -85,7 +85,7 @@ def gui(page: Page):
 
     block_width_or = lambda x, fn=block_width: dyn if ((dyn := fn()) and dyn < x) else x
 
-    frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(MAX_WIDTH)
+    frame_switcher_width = lambda: BOARD_WIDTH * block_width_or(MAX_WIDTH) + PADDING
 
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
@@ -98,7 +98,9 @@ def gui(page: Page):
         puzzle = parse_puzzle(puzzle_input.current.value)
         BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
         page.window_min_height = window_min_height()
-        page.window_min_width = window_min_width()
+        page.window_min_width = window_width_from()
+        page.window_width = window_width_from(110)
+        page.window_height = window_min_height()
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls

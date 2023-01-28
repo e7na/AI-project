@@ -215,7 +215,8 @@ def gui(page: Page):
         style=ButtonStyle(color=colors.PRIMARY),
     )
 
-    frame_switcher = Row([Row(disabled=True, expand=True, controls=[
+    frame_switcher = Row(disabled=True, controls=[
+        Row(expand=True, controls=[
                         OutlinedButton(
                             icon=icons.ARROW_BACK,
                             on_click=prev_frame,

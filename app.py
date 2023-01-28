@@ -34,7 +34,7 @@ def gui(page: Page):
     # page.update()
     APPBAR_HEIGHT = 70
     PADDING = 30
-    BUTTON_HEIGHT = 58
+    BUTTON_HEIGHT = 57
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
     TOOLTIPS_WIDTH = 110
@@ -135,7 +135,7 @@ def gui(page: Page):
         return (blocks := [[TextField(
                 value=value(block), text_align="center", dense=True,
                 width=block_width_or(MAX_WIDTH), disabled=not_empty(block),
-                read_only=True, border_color=colors.PRIMARY,
+                read_only=True, border_color=colors.PRIMARY, border_radius=10
             ) for block in row
         ] for row in (board if isinstance(board, np.ndarray) else board(index))])
     # fmt: on
@@ -258,11 +258,13 @@ def gui(page: Page):
                         height=get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()),
                         wrap=True,
                         alignment="center",
-                        spacing=8,
+                        spacing=9,
                         controls=[
                             Dropdown(
                                 width=TOOLTIPS_WIDTH,
-                                height=57,
+                                height=BUTTON_HEIGHT,
+                                color=colors.PRIMARY,
+                                text_style=TextStyle(weight="Bold"),
                                 border_radius=10,
                                 border_width=0,
                                 content_padding=16,
@@ -292,7 +294,9 @@ def gui(page: Page):
                                         Text(
                                             "Action:",
                                             weight="bold"),
-                                        Text(ref=action)],
+                                        Text(ref=action,
+                                        color=colors.PRIMARY,
+                                        weight="w500")],
                                     spacing=3,
                                     alignment="start"),
                                 height=BUTTON_HEIGHT),
@@ -301,7 +305,9 @@ def gui(page: Page):
                                         Text(
                                             "Heuristic:",
                                             weight="bold"),
-                                        Text(ref=heuristic)],
+                                        Text(ref=heuristic,
+                                        color=colors.PRIMARY,
+                                        weight="w500")],
                                     spacing=3,
                                     alignment="start"),
                                 height=BUTTON_HEIGHT),
@@ -312,7 +318,7 @@ def gui(page: Page):
                                             weight="bold"),
                                         Text(ref=steps_summary,
                                         color=colors.PRIMARY,
-                                        weight="bold")],
+                                        weight="w500")],
                                     spacing=3,
                                     alignment="start"),
                                 height=BUTTON_HEIGHT),
@@ -323,7 +329,7 @@ def gui(page: Page):
                                             weight="bold"),
                                         Text(ref=move_count,
                                         color=colors.PRIMARY,
-                                        weight="bold")],
+                                        weight="w500")],
                                     spacing=3,
                                     alignment="start"),
                                 height=BUTTON_HEIGHT),
@@ -359,6 +365,7 @@ def gui(page: Page):
         top_view = page.views[-1]
         # page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
+        update_clickability()
         update_content()
 
     page.on_route_change = route_change

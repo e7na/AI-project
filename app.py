@@ -14,8 +14,8 @@ algo_key = list(FronierOptions.keys())[0]
 
 def gui(page: Page):
 
-    get_or = lambda callable, default: (
-        result if not (page.web) and (result := callable()) else default
+    get_or = lambda fn, default: (
+        result if not (page.web) and (result := fn()) else default
     )
 
     index = 0
@@ -121,7 +121,7 @@ def gui(page: Page):
 
     def change_algo(e):
         global algo_key, path
-        nonlocal SOLVED
+        nonlocal SOLVED, index
         algo_key = algo_dd.current.value
         path = []
         SOLVED = False
@@ -145,7 +145,7 @@ def gui(page: Page):
         if SOLVED:
             solve_button.current.disabled = True
             frame_switcher.current.disabled = False
-        else: 
+        else:
             solve_button.current.disabled = False
             frame_switcher.current.disabled = True
 
@@ -251,7 +251,7 @@ def gui(page: Page):
                                         expand=1,
                                         height=BUTTON_HEIGHT,
                                         style=BUTTON_STYLE)],
-                                width=frame_switcher_width())],)], ref=board,),
+                                width=frame_switcher_width())],)], ref=board),
 
                     Column(
                         ref=tooltips,
@@ -288,8 +288,7 @@ def gui(page: Page):
                                 style=BUTTON_STYLE,
                                 disabled=True),
 
-                            Container(
-                                Column([
+                            Container(Column([
                                         Text(
                                             "Action:",
                                             weight="bold"),
@@ -298,8 +297,7 @@ def gui(page: Page):
                                     alignment="start"),
                                 height=BUTTON_HEIGHT),
 
-                            Container(
-                                Column([
+                            Container(Column([
                                         Text(
                                             "Heuristic:",
                                             weight="bold"),
@@ -371,4 +369,4 @@ def gui(page: Page):
 
 
 if __name__ == "__main__":
-    app(target=gui, port=8080, assets_dir="assets", view=WEB_BROWSER)
+    app(target=gui, port=8080, assets_dir="assets")

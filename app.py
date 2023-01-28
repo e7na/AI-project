@@ -12,14 +12,13 @@ frames = lambda index: path[index].state
 algo_key = list(FronierOptions.keys())[0]
 
 
-def get_or(callable, default):
-    try:
-        return callable()
-    except ValueError:
+def gui(page: Page):
+    def get_or(callable, default):
+        nonlocal page
+        if not (page.web):
+            return callable()
         return default
 
-
-def gui(page: Page):
     index = 0
     SOLVED = False
     TITLE = "A* Sliding Puzzle"
@@ -39,12 +38,12 @@ def gui(page: Page):
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
     page.window_min_height = ((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + 70
-    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 70
+    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 140
     width_equation = lambda: get_or(
         lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
     )
-    page.window_width = BOARD_WIDTH * width_equation()
-    window_height = lambda: (BOARD_HEIGHT * 90) + 140
+    page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
+    window_height = lambda: (BOARD_HEIGHT * BUTTON_HEIGHT) + 140
     page.window_height = window_height()
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
@@ -67,7 +66,13 @@ def gui(page: Page):
     algo_dd = Ref[Dropdown]()
     solve_button = Ref[ElevatedButton]()
 
-    steps_string = lambda: "Goal Reached!"  if (index + 1) == len(path) else f"{index + 1} of {len(path)}" if SOLVED else "Press Solve"
+    steps_string = (
+        lambda: "Goal Reached!"
+        if (index + 1) == len(path)
+        else f"{index + 1} of {len(path)}"
+        if SOLVED
+        else "Press Solve"
+    )
 
     block_width_or = (
         lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
@@ -146,7 +151,7 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.current.height = get_or(lambda: page.window_width, FALLBACK_HEIGHT)
+        tooltips.current.height = get_or(lambda: page.window_height, window_height())
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -232,7 +237,7 @@ def gui(page: Page):
 
                     Column(
                         ref=tooltips,
-                        height=get_or(lambda: page.window_height - 70, FALLBACK_HEIGHT),
+                        height=get_or(lambda: page.window_height, window_height()),
                         wrap=True,
                         alignment="center",
                         spacing=8,

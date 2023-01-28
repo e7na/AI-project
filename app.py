@@ -44,7 +44,7 @@ def gui(page: Page):
         lambda: page.window_width * 0.65 / tooltips_columns() / BOARD_WIDTH,
         FALLBACK_WIDTH,
     )
-    content_height = lambda: ((BOARD_HEIGHT + 2) * BUTTON_HEIGHT)
+    content_height = lambda: ((BOARD_HEIGHT + 1) * BUTTON_HEIGHT + APPBAR_HEIGHT)
     window_min_height = lambda: content_height() + APPBAR_HEIGHT + PADDING
     window_width_from = lambda block_width=FALLBACK_WIDTH: (
         BOARD_WIDTH * block_width + TOOLTIPS_WIDTH * tooltips_columns() + PADDING

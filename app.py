@@ -234,13 +234,13 @@ def gui(page: Page):
 
                         Row([Row(ref=frame_switcher, disabled=True, controls=[
                                     OutlinedButton(
-                                        "Previous",
+                                        icon=icons.ARROW_BACK,
                                         on_click=prev_frame,
                                         expand=1,
                                         height=BUTTON_HEIGHT,
                                         style=ButtonStyle(shape=RoundedRectangleBorder(radius=10))),
-                                    ElevatedButton(
-                                        "Next",
+                                    OutlinedButton(
+                                        icon=icons.ARROW_FORWARD,
                                         on_click=next_frame,
                                         expand=1,
                                         height=BUTTON_HEIGHT,

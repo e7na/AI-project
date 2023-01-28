@@ -32,21 +32,26 @@ def gui(page: Page):
     page.title = TITLE
     page.dark_theme = page.theme = Theme(color_scheme_seed=colors.PURPLE_ACCENT_100)
     page.theme_mode = "dark"
-    page.update()
+    # page.update()
+    APPBAR_HEIGHT = 70
+    PADDING = 30
     BUTTON_HEIGHT = 58
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
-    APPBAR_HEIGHT = 70
+    TOOLTIPS_WIDTH = 110
+    tooltips_columns = lambda: FALLBACK_HEIGHT / content_height()
+    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + APPBAR_HEIGHT + PADDING
     block_width = lambda: get_or(
-        lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
+        lambda: page.window_width * 0.65 / tooltips_columns() / BOARD_WIDTH,
+        FALLBACK_WIDTH,
     )
     content_height = lambda: ((BOARD_HEIGHT + 2) * BUTTON_HEIGHT)
-    PADDING = 30
-    window_height = lambda: content_height() + APPBAR_HEIGHT + PADDING
-    page.window_min_height = window_height()
-    TOOLTIPS_WIDTH = 110
-    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + APPBAR_HEIGHT + PADDING
-    page.window_min_width = BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH*(FALLBACK_HEIGHT/content_height()) + 2*PADDING
+    window_min_height = lambda: content_height() + APPBAR_HEIGHT + PADDING
+    window_min_width = lambda: (
+        BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH * tooltips_columns() + 2 * PADDING
+    )
+    page.window_min_height = window_min_height()
+    page.window_min_width = window_min_width()
     # page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
     # page.window_height = content_height()
     page.fonts = {
@@ -92,8 +97,8 @@ def gui(page: Page):
         SOLVED = False
         puzzle = parse_puzzle(puzzle_input.current.value)
         BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
-        page.window_min_height = window_height()
-        page.window_min_width = BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH*(FALLBACK_HEIGHT/content_height()) + 2*PADDING
+        page.window_min_height = window_min_height()
+        page.window_min_width = window_min_width()
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls
@@ -154,7 +159,9 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.current.height = get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height())
+        tooltips.current.height = get_or(
+            lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()
+        )
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -358,4 +365,4 @@ def gui(page: Page):
 
 
 if __name__ == "__main__":
-    app(target=gui, port=8080, assets_dir="assets")
+    app(target=gui, port=8080, assets_dir="assets", view=WEB_BROWSER)

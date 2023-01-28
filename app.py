@@ -37,14 +37,15 @@ def gui(page: Page):
     BUTTON_HEIGHT = 58
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
-    page.window_min_height = ((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + 70
-    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 140
+    APPBAR_HEIGHT = 70
+    # FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 140
     width_equation = lambda: get_or(
         lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
     )
-    page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
-    window_height = lambda: (BOARD_HEIGHT * BUTTON_HEIGHT) + 140
-    page.window_height = window_height()
+    content_height = lambda: ((BOARD_HEIGHT + 2) * BUTTON_HEIGHT)
+    page.window_min_height = content_height() #((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + APPBAR_HEIGHT
+    # page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
+    # page.window_height = content_height()
     page.fonts = {
         "Fira Code": "/fonts/FiraCode-Regular.ttf",
     }
@@ -94,7 +95,7 @@ def gui(page: Page):
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls
-        page.window_min_height = ((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + 70
+        # page.window_min_height = window_height()#((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + APPBAR_HEIGHT
         resize_and_update()
         view_pop(e)
 
@@ -151,7 +152,8 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.current.height = get_or(lambda: page.window_height, window_height())
+        page.window_min_height = content_height() + APPBAR_HEIGHT
+        tooltips.current.height = get_or(lambda: page.window_height, content_height())
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -206,7 +208,7 @@ def gui(page: Page):
                     title=Text(TITLE, color=colors.PRIMARY, weight="bold"),
                     center_title=True,
                     bgcolor=colors.PRIMARY_CONTAINER,
-                    toolbar_height=70,
+                    toolbar_height=APPBAR_HEIGHT,
                     actions=[theme_button]),
 
                 Row(alignment="center",vertical_alignment="center", expand=True, controls=[
@@ -237,7 +239,7 @@ def gui(page: Page):
 
                     Column(
                         ref=tooltips,
-                        height=get_or(lambda: page.window_height, window_height()),
+                        height=get_or(lambda: page.window_height, content_height()),
                         wrap=True,
                         alignment="center",
                         spacing=8,
@@ -341,7 +343,7 @@ def gui(page: Page):
     def view_pop(view):
         page.views.pop()
         top_view = page.views[-1]
-        page.window_height = (BOARD_HEIGHT * 90) + 70
+        # page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
         frame_switcher.current.disabled = False
         solve_button.current.disabled = True

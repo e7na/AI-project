@@ -13,11 +13,10 @@ algo_key = list(FronierOptions.keys())[0]
 
 
 def gui(page: Page):
-    def get_or(callable, default):
-        nonlocal page
-        if not (page.web) and (result := callable()):
-            return result
-        return default
+
+    get_or = lambda callable, default: (
+        result if not (page.web) and (result := callable()) else default
+    )
 
     index = 0
     SOLVED = False
@@ -116,8 +115,6 @@ def gui(page: Page):
         if result := search(*puzzle, algo_key):
             path, *_ = result
             SOLVED = True
-            frame_switcher.current.disabled = False
-            solve_button.current.disabled = True
         update_content()
 
     def change_algo(e):
@@ -127,8 +124,6 @@ def gui(page: Page):
         path = []
         SOLVED = False
         index = 0
-        solve_button.current.disabled = False
-        frame_switcher.current.disabled = True
         update_content()
 
     # fmt: off
@@ -159,6 +154,12 @@ def gui(page: Page):
         m[x][y].disabled = not_empty(b)
 
     def update_content():
+        if SOLVED:
+            solve_button.current.disabled = True
+            frame_switcher.current.disabled = False
+        else: 
+            solve_button.current.disabled = False
+            frame_switcher.current.disabled = True
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
         tooltips.current.height = get_or(
@@ -355,8 +356,6 @@ def gui(page: Page):
         top_view = page.views[-1]
         # page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
-        frame_switcher.current.disabled = False
-        solve_button.current.disabled = True
         update_content()
 
     page.on_route_change = route_change

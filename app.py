@@ -15,8 +15,8 @@ algo_key = list(FronierOptions.keys())[0]
 def gui(page: Page):
     def get_or(callable, default):
         nonlocal page
-        if not (page.web):
-            return callable()
+        if not (page.web) and (result := callable()):
+            return result
         return default
 
     index = 0
@@ -33,17 +33,20 @@ def gui(page: Page):
     page.dark_theme = page.theme = Theme(color_scheme_seed=colors.PURPLE_ACCENT_100)
     page.theme_mode = "dark"
     page.update()
-    page.window_min_width = 550
     BUTTON_HEIGHT = 58
     MAX_WIDTH = 150
     FALLBACK_WIDTH = 87
     APPBAR_HEIGHT = 70
-    # FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + 140
-    width_equation = lambda: get_or(
+    block_width = lambda: get_or(
         lambda: page.window_width * 0.65 / (BOARD_WIDTH), FALLBACK_WIDTH
     )
     content_height = lambda: ((BOARD_HEIGHT + 2) * BUTTON_HEIGHT)
-    page.window_min_height = content_height() #((BOARD_HEIGHT + 3) * BUTTON_HEIGHT) + APPBAR_HEIGHT
+    PADDING = 30
+    window_height = lambda: content_height() + APPBAR_HEIGHT + PADDING
+    page.window_min_height = window_height()
+    TOOLTIPS_WIDTH = 110
+    FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + APPBAR_HEIGHT + PADDING
+    page.window_min_width = BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH*(FALLBACK_HEIGHT/content_height()) + 2*PADDING
     # page.window_width = (BOARD_WIDTH + 1.5) * width_equation()
     # page.window_height = content_height()
     page.fonts = {
@@ -75,12 +78,9 @@ def gui(page: Page):
         else "Press Solve"
     )
 
-    block_width_or = (
-        lambda x, fn=width_equation: dyn if ((dyn := fn()) and dyn < x) else x
-    )
+    block_width_or = lambda x, fn=block_width: dyn if ((dyn := fn()) and dyn < x) else x
 
     frame_switcher_width = lambda: (BOARD_WIDTH + 0.3) * block_width_or(MAX_WIDTH)
-    TOOLTIPS_WIDTH = 110
 
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
@@ -92,6 +92,8 @@ def gui(page: Page):
         SOLVED = False
         puzzle = parse_puzzle(puzzle_input.current.value)
         BOARD, (BOARD_HEIGHT, BOARD_WIDTH) = puzzle
+        page.window_min_height = window_height()
+        page.window_min_width = BOARD_WIDTH * FALLBACK_WIDTH + TOOLTIPS_WIDTH*(FALLBACK_HEIGHT/content_height()) + 2*PADDING
         generate_grid(BOARD)
         controls = [Row(row) for row in blocks]
         board.current.controls = controls
@@ -152,8 +154,7 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        page.window_min_height = content_height() + APPBAR_HEIGHT
-        tooltips.current.height = get_or(lambda: page.window_height, content_height())
+        tooltips.current.height = get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height())
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -239,7 +240,7 @@ def gui(page: Page):
 
                     Column(
                         ref=tooltips,
-                        height=get_or(lambda: page.window_height, content_height()),
+                        height=get_or(lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()),
                         wrap=True,
                         alignment="center",
                         spacing=8,

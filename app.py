@@ -548,7 +548,8 @@ def gui(page: Page):
     page.on_view_pop = view_pop
     page.go(page.route)
 
-    update_content()
+    # update_content()
+    resize_and_update()
 
 
 if __name__ == "__main__":

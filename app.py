@@ -69,11 +69,11 @@ def gui(page: Page):
         tooltips.height = get_or(
             lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()
         )
+        info_row[0].width = content_width()
         frame_switcher[0].width = content_width()
         action_con[0].width = heuristic_con[0].width = Steps[0].width = (
             content_width() / 3
         )
-        # tooltips.height
         update_content()
 
     page.on_resize = lambda e: resize_and_update()
@@ -185,7 +185,6 @@ def gui(page: Page):
 
     def update_width(x, y, b, m):
         m[x][y].width = block_width_or(MAX_WIDTH)
-        info_row[0].width = content_width()
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))

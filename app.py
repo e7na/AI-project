@@ -542,10 +542,11 @@ def gui(page: Page):
         # page.window_height = (BOARD_HEIGHT * 90) + 70
         page.go(top_view.route)
         update_clickability()
-        update_content()
+        # resize_and_update()
+        # update_content()
 
     page.on_route_change = route_change
-    page.on_view_pop = view_pop
+    page.on_view_pop = lambda e: resize_and_update
     page.go(page.route)
 
     # update_content()

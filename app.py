@@ -40,17 +40,21 @@ def gui(page: Page):
     FALLBACK_WIDTH = 87
     TOOLTIPS_WIDTH = 110
     tooltips_columns = lambda: FALLBACK_HEIGHT / content_height()
+    # two_bottom_rows = lambda: BOARD_HEIGHT <= 6 and BOARD_WIDTH >= 3
+    bottom_rows = lambda: 2 if BOARD_HEIGHT <= 6 and BOARD_WIDTH >= 3 else 1
     FALLBACK_HEIGHT = 7 * BUTTON_HEIGHT + APPBAR_HEIGHT + PADDING + EXTRA_PADDING
     block_width = lambda: get_or(
-        lambda: page.window_width * 0.65 / tooltips_columns() / BOARD_WIDTH,
+        lambda: (page.window_width - 2 * PADDING) * 0.65 / BOARD_WIDTH,
         FALLBACK_WIDTH,
     )
-    content_height = lambda: ((BOARD_HEIGHT + 1) * BUTTON_HEIGHT + APPBAR_HEIGHT)
+    content_height = lambda: (
+        (BOARD_HEIGHT + bottom_rows()) * BUTTON_HEIGHT + APPBAR_HEIGHT
+    )
     window_min_height = (
         lambda: content_height() + APPBAR_HEIGHT + PADDING + EXTRA_PADDING
     )
     window_width_from = lambda block_width=FALLBACK_WIDTH: (
-        BOARD_WIDTH * block_width + TOOLTIPS_WIDTH * tooltips_columns() + PADDING
+        BOARD_WIDTH * block_width + TOOLTIPS_WIDTH + PADDING
     )
     page.window_min_height = window_min_height()
     page.window_min_width = window_width_from()
@@ -339,7 +343,7 @@ def gui(page: Page):
 
     def set_widgets():
         nonlocal info_row, tooltips
-        if BOARD_HEIGHT <= 6 and BOARD_WIDTH >= 3:
+        if bottom_rows() == 2:
             info_row = (
                 Column(
                     [

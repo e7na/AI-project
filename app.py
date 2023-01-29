@@ -62,6 +62,14 @@ def gui(page: Page):
 
     def resize_and_update():
         blocks_map(update_width)
+        tooltips.height = get_or(
+            lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()
+        )
+        frame_switcher[0].width = content_width()
+        action_con[0].width = heuristic_con[0].width = Steps[0].width = (
+            content_width() / 3
+        )
+        # tooltips.height
         update_content()
 
     page.on_resize = lambda e: resize_and_update()
@@ -84,7 +92,7 @@ def gui(page: Page):
 
     block_width_or = lambda x, fn=block_width: dyn if ((dyn := fn()) and dyn < x) else x
 
-    frame_switcher_width = lambda: BOARD_WIDTH * block_width_or(MAX_WIDTH) + PADDING
+    content_width = lambda: BOARD_WIDTH * block_width_or(MAX_WIDTH) + PADDING
 
     value = lambda block: block if block != PLACEHOLDER else "  "
     not_empty = lambda block: bool(block != PLACEHOLDER)
@@ -173,7 +181,7 @@ def gui(page: Page):
 
     def update_width(x, y, b, m):
         m[x][y].width = block_width_or(MAX_WIDTH)
-        info_row[0].width = frame_switcher_width()
+        info_row[0].width = content_width()
 
     def update_value(x, y, b, m):
         m[x][y].value = str(value(b))
@@ -182,9 +190,6 @@ def gui(page: Page):
     def update_content():
         blocks_map(update_value)
         steps_summary.current.value = steps_string()
-        tooltips.height = get_or(
-            lambda: page.window_height - APPBAR_HEIGHT - PADDING, content_height()
-        )
         action.current.value = str(path[index].action if SOLVED else None).capitalize()
         heuristic.current.value = str(path[index].heuristic if SOLVED else None)
         move_count.current.value = (
@@ -259,7 +264,7 @@ def gui(page: Page):
                             style=BUTTON_STYLE,
                         ),
                     ],
-                    width=frame_switcher_width(),
+                    width=content_width(),
                 )
             ],
         ),
@@ -334,7 +339,7 @@ def gui(page: Page):
 
     def set_widgets():
         nonlocal info_row, tooltips
-        if BOARD_HEIGHT <= 4 and BOARD_WIDTH >= 3:
+        if BOARD_HEIGHT <= 6 and BOARD_WIDTH >= 3:
             info_row = (
                 Column(
                     [
@@ -347,7 +352,7 @@ def gui(page: Page):
                         ),
                         frame_switcher[0],
                     ],
-                    width=frame_switcher_width(),
+                    width=content_width(),
                 ),
             )
 

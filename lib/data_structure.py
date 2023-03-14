@@ -4,7 +4,7 @@ class Node:
         state,
         parent=None,
         children=None,
-        action=None,
+        action: str | None = None,
         heuristic: int = -1,
         is_sol=None,
     ):

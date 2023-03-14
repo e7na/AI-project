@@ -3,6 +3,8 @@ import numpy as np
 from lib import *
 
 INPUT = "puzzle.txt"
+START_TIME: float = -1
+ITERATION_LIMIT: int = 5000
 
 
 def read_file(file_path):
@@ -28,23 +30,22 @@ def parse_puzzle(puzzle):
 
 
 def search(
-    puzzle, dimensions, algo="GBFS"
-) -> tuple[list[Node], list[str], Node, list[np.ndarray], list[np.ndarray]]:
+    puzzle, dimensions: tuple[int, int], algo="GBFS"
+) -> tuple[list[Node], list[str], Node, list[np.ndarray]] | None:
     """Initialise search parameters"""
     root = Node(state=puzzle, parent=None, action=None, is_sol=1)
     frontier = FronierOptions[algo]()  # GBFS
     frontier.add(root)
-    explored = []
-    solution = []
-    path = []
-    global START_TIME, iteration_limit
+    explored: list[np.ndarray] = []
+    solution: list[str] = []
+    path: list[Node] = []
+    global START_TIME
     START_TIME = time.time()
-    iteration_limit = 5000
-    height, width = dimensions
+    _, width = dimensions
 
     print()
-    """main search loop"""
-    while not frontier.is_empty() and len(explored) <= iteration_limit:
+    ## main search loop
+    while not frontier.is_empty() and len(explored) <= ITERATION_LIMIT:
         # realtime feedback to determine whether it's hung up or not
         print(
             f"\033[Ffrontier length: {len(frontier)}"
@@ -88,7 +89,7 @@ def search(
                 frontier.add(child)
 
     if path:
-        solution = [node.action for node in path if node.parent is not None]
+        solution = [node.action for node in path if node.parent and node.action]
         # states = [node.state for node in path]
         return path, solution, root, explored
     else:
@@ -96,17 +97,18 @@ def search(
 
 
 if __name__ == "__main__":
-    _, solution, root, explored = search(*parse_puzzle(read_file(INPUT)))
-    print("\n")
-    if len(explored) >= iteration_limit:
-        print("attempt timed out")
-    elif not solution:
-        print("no solution")
-    else:
-        print(
-            f"search time: {round(time.time() - START_TIME,5)} seconds"
-            f"\n# of solution steps = {len(solution)}"
-            f"\nsolution: {solution}"
-        )
-        graph = lv.objviz(root)
-        graph.view()
+    if result := search(*parse_puzzle(read_file(INPUT))):
+        _, solution, root, explored = result
+        print("\n")
+        if len(explored) >= ITERATION_LIMIT:
+            print("attempt timed out")
+        elif not solution:
+            print("no solution")
+        else:
+            print(
+                f"search time: {round(time.time() - START_TIME,5)} seconds"
+                f"\n# of solution steps = {len(solution)}"
+                f"\nsolution: {solution}"
+            )
+            graph = lv.objviz(root)
+            graph.view()

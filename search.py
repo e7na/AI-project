@@ -60,7 +60,7 @@ def search(
         # if the current state is the goal, then generate
         # the solution steps list and exit out to print it
         if is_goal(current.state):
-            leaf = current
+            # leaf = current
             while current.parent is not None:
                 current.is_sol = 1
                 # prepend current.action to the solution list

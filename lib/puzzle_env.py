@@ -1,17 +1,19 @@
 from lib.data_structure import *
 import numpy as np
+from typing import Callable
 
 # initializing the puzzle properties
 SLOT = "__"
 SEPARATOR = "|"
 PLACEHOLDER = -1
 
-FronierOptions = {  
-    "A*"  : GBFSFrontier,
-    "GBFS": GBFSFrontier,
-    "BFS" : QueueFrontier,
-    "DFS" : StackFrontier,
+FronierOptions: dict[str, Callable] = {
+    "A*": PriorityQueue,
+    "GBFS": PriorityQueue,
+    "BFS": QueueFrontier,
+    "DFS": StackFrontier,
 }
+
 
 # check if the current state is the goal state
 def is_goal(state):
@@ -95,17 +97,15 @@ def children(state, dimensions):
 # apply a specific move to a board given its state,
 # and return the state resulting from this move
 def apply_move(move, state):
-    initial_state = (
-        state.copy()
-    )  # create new object instead of referencing the original
-    """
-    the move data structure is as follows
-    move : list = [
-        action : str,
-        [ slot_x : int, slot_y : int ]
-    ]
-    """
+    # create new object instead of referencing the original
+    initial_state = state.copy()
+
     match move:
+        # the move data structure is as follows
+        # move : list = [
+        #     action : str,
+        #     [ slot_x : int, slot_y : int ]
+        # ]
         case ["up", slot_coords]:
             new_state = swap_up(initial_state, slot_coords)
         case ["down", slot_coords]:
